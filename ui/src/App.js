@@ -20,7 +20,9 @@ import {
   ChevronLeft as ChevronLeftIcon,
   Dashboard as DashboardIcon,
   EventNote as EventNoteIcon,
-  People as PeopleIcon
+  People as PeopleIcon,
+  AttachMoney,
+  CompareArrows
 } from "@material-ui/icons";
 
 import SpendingByClub from "./SpendingByClub";
@@ -188,20 +190,10 @@ class App extends Component {
 
                 <ListItem
                   button
-                  onClick={() => this.setSelectedView("Businesses")}
-                >
-                  <ListItemIcon>
-                    <EventNoteIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Businesses" />
-                </ListItem>
-
-                <ListItem
-                  button
                   onClick={() => this.setSelectedView("SpendingByClub")}
                 >
                   <ListItemIcon>
-                    <PeopleIcon />
+                    <AttachMoney />
                   </ListItemIcon>
                   <ListItemText primary="Spending By Club" />
                 </ListItem>
@@ -210,7 +202,7 @@ class App extends Component {
                   onClick={() => this.setSelectedView("TopTransfers")}
                 >
                   <ListItemIcon>
-                    <PeopleIcon />
+                    <CompareArrows />
                   </ListItemIcon>
                   <ListItemText primary="Top Transfers" />
                 </ListItem>
@@ -223,7 +215,6 @@ class App extends Component {
             {/* FIXME: Use proper routing here instead  */}
             <Typography component="div" className={classes.chartContainer}>
               {this.state.selectedView === "Home" ? <SpendingByClub /> : null}
-              {this.state.selectedView === "Businesses" ? <div /> : null}
               {this.state.selectedView === "SpendingByClub" ? (
                 <SpendingByClub />
               ) : null}

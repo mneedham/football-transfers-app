@@ -109,6 +109,7 @@ class SpendingByClub extends React.Component {
                 club
                 clubImage
                 countryImage
+                moneyReceived
               }
             }
           `}
@@ -159,6 +160,28 @@ class SpendingByClub extends React.Component {
                         </TableSortLabel>
                       </Tooltip>
                     </TableCell>
+                    <TableCell
+                      key="moneyReceived"
+                      sortDirection={
+                        orderBy === "moneyReceived" ? order : false
+                      }
+                    >
+                      <Tooltip
+                        title="Sort"
+                        placement="bottom-start"
+                        enterDelay={300}
+                      >
+                        <TableSortLabel
+                          active={orderBy === "moneyReceived"}
+                          direction={order}
+                          onClick={() =>
+                            this.handleSortRequest("moneyReceived")
+                          }
+                        >
+                          Amount Received
+                        </TableSortLabel>
+                      </Tooltip>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -187,6 +210,13 @@ class SpendingByClub extends React.Component {
                         <TableCell>{n.country}</TableCell>
                         <TableCell>
                           {n.moneySpent.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "GBP",
+                            minimumFractionDigits: 0
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          {n.moneyReceived.toLocaleString("en-US", {
                             style: "currency",
                             currency: "GBP",
                             minimumFractionDigits: 0
