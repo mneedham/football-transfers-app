@@ -156,8 +156,8 @@ class TopTransfers extends React.Component {
           }}
         >
           {({ loading, error, data }) => {
-            if (loading) return <p>Loading...</p>;
-            if (error) return <p>Error</p>;
+            if (loading) return <p style={{ padding: "7px" }}>Loading...</p>;
+            if (error) return <p style={{ padding: "7px" }}>Error</p>;
 
             return (
               <Table className={this.props.classes.table}>
