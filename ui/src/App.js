@@ -23,7 +23,7 @@ import {
   People as PeopleIcon
 } from "@material-ui/icons";
 
-import UserList from "./UserList";
+import UserList from "./SpendingByClub";
 import classNames from "classnames";
 
 const drawerWidth = 240;
@@ -156,7 +156,7 @@ class App extends Component {
                 noWrap
                 className={classes.title}
               >
-                Welcome To GRANDstack
+                Football Transfers Graph
               </Typography>
             </Toolbar>
           </AppBar>
@@ -199,7 +199,7 @@ class App extends Component {
                   <ListItemIcon>
                     <PeopleIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Users" />
+                  <ListItemText primary="Spending By Club" />
                 </ListItem>
               </div>
             </List>

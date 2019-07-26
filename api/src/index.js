@@ -2,7 +2,7 @@ import { typeDefs } from "./graphql-schema";
 import { ApolloServer } from "apollo-server-express";
 import express from "express";
 import { v1 as neo4j } from "neo4j-driver";
-import { makeAugmentedSchema } from "neo4j-graphql-js";
+import { makeAugmentedSchema, inferSchema } from "neo4j-graphql-js";
 import dotenv from "dotenv";
 
 // set environment variables from ../.env
@@ -19,8 +19,17 @@ const app = express();
  */
 
 const schema = makeAugmentedSchema({
-  typeDefs
+  typeDefs, config: {query: true, mutation: false}
 });
+
+// const inferAugmentedSchema = driver => {
+//   return inferSchema(driver).then(result => {
+//     console.log(result.typeDefs)
+//     return makeAugmentedSchema({
+//       typeDefs: result.typeDefs
+//     });
+//   });
+// };
 
 /*
  * Create a Neo4j driver instance to connect to the database
@@ -31,7 +40,7 @@ const driver = neo4j.driver(
   process.env.NEO4J_URI || "bolt://localhost:7687",
   neo4j.auth.basic(
     process.env.NEO4J_USER || "neo4j",
-    process.env.NEO4J_PASSWORD || "neo4j"
+    process.env.NEO4J_PASSWORD || "neo"
   )
 );
 

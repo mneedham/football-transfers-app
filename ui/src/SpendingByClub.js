@@ -13,8 +13,10 @@ import {
   Paper,
   TableSortLabel,
   Typography,
-  TextField
+  TextField,
+  Image
 } from "@material-ui/core";
+import Avatar from "@material-ui/core/Avatar";
 
 const styles = theme => ({
   root: {
@@ -33,16 +35,16 @@ const styles = theme => ({
   }
 });
 
-class UserList extends React.Component {
+class SpendingByClub extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      order: "asc",
-      orderBy: "name",
+      order: "desc",
+      orderBy: "moneySpent",
       page: 0,
       rowsPerPage: 10,
-      usernameFilter: ""
+      countryFilter: ""
     };
   }
 
@@ -57,12 +59,6 @@ class UserList extends React.Component {
     this.setState({ order, orderBy });
   };
 
-  getFilter = () => {
-    return this.state.usernameFilter.length > 0
-      ? { name_contains: this.state.usernameFilter }
-      : {};
-  };
-
   handleFilterChange = filterName => event => {
     const val = event.target.value;
 
@@ -74,17 +70,18 @@ class UserList extends React.Component {
   render() {
     const { order, orderBy } = this.state;
     const { classes } = this.props;
+
     return (
       <Paper className={classes.root}>
-        <Typography variant="h2" gutterBottom>
-          User List
+        <Typography variant="h2" style={{ padding: "7px" }} gutterBottom>
+          Spending by club
         </Typography>
         <TextField
           id="search"
-          label="User Name Contains"
+          label="Country"
           className={classes.textField}
-          value={this.state.usernameFilter}
-          onChange={this.handleFilterChange("usernameFilter")}
+          value={this.state.countryFilter}
+          onChange={this.handleFilterChange("countryFilter")}
           margin="normal"
           variant="outlined"
           type="text"
@@ -95,30 +92,31 @@ class UserList extends React.Component {
 
         <Query
           query={gql`
-            query usersPaginateQuery(
+            query topSpendingQuery(
+              $country: String
+              $orderBy: [_SpendingOrdering]
               $first: Int
               $offset: Int
-              $orderBy: [_UserOrdering]
-              $filter: _UserFilter
             ) {
-              User(
+              spendingByClub(
+                countrySubstring: $country
+                orderBy: $orderBy
                 first: $first
                 offset: $offset
-                orderBy: $orderBy
-                filter: $filter
               ) {
-                id
-                name
-                avgStars
-                numReviews
+                moneySpent
+                country
+                club
+                clubImage
+                countryImage
               }
             }
           `}
           variables={{
             first: this.state.rowsPerPage,
             offset: this.state.rowsPerPage * this.state.page,
-            orderBy: this.state.orderBy + "_" + this.state.order,
-            filter: this.getFilter()
+            country: this.state.countryFilter,
+            orderBy: this.state.orderBy + "_" + this.state.order
           }}
         >
           {({ loading, error, data }) => {
@@ -130,8 +128,22 @@ class UserList extends React.Component {
                 <TableHead>
                   <TableRow>
                     <TableCell
-                      key="name"
-                      sortDirection={orderBy === "name" ? order : false}
+                      key="club"
+                      sortDirection={orderBy === "club" ? order : false}
+                      colSpan={2}
+                    >
+                      Club
+                    </TableCell>
+                    <TableCell
+                      key="country"
+                      sortDirection={orderBy === "country" ? order : false}
+                      colSpan={2}
+                    >
+                      Country
+                    </TableCell>
+                    <TableCell
+                      key="moneySpent"
+                      sortDirection={orderBy === "moneySpent" ? order : false}
                     >
                       <Tooltip
                         title="Sort"
@@ -139,65 +151,47 @@ class UserList extends React.Component {
                         enterDelay={300}
                       >
                         <TableSortLabel
-                          active={orderBy === "name"}
+                          active={orderBy === "moneySpent"}
                           direction={order}
-                          onClick={() => this.handleSortRequest("name")}
+                          onClick={() => this.handleSortRequest("moneySpent")}
                         >
-                          Name
-                        </TableSortLabel>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell
-                      key="avgStars"
-                      sortDirection={orderBy === "avgStars" ? order : false}
-                      numeric
-                    >
-                      <Tooltip
-                        title="Sort"
-                        placement="bottom-end"
-                        enterDelay={300}
-                      >
-                        <TableSortLabel
-                          active={orderBy === "avgStars"}
-                          direction={order}
-                          onClick={() => this.handleSortRequest("avgStars")}
-                        >
-                          Average Stars
-                        </TableSortLabel>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell
-                      key="numReviews"
-                      sortDirection={orderBy === "numReviews" ? order : false}
-                      numeric
-                    >
-                      <Tooltip
-                        title="Sort"
-                        placement="bottom-start"
-                        enterDelay={300}
-                      >
-                        <TableSortLabel
-                          active={orderBy === "numReviews"}
-                          direction={order}
-                          onClick={() => this.handleSortRequest("numReviews")}
-                        >
-                          Number of Reviews
+                          Amount Spent
                         </TableSortLabel>
                       </Tooltip>
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {data.User.map(n => {
+                  {data.spendingByClub.map(n => {
                     return (
-                      <TableRow key={n.id}>
+                      <TableRow key={n.club}>
+                        <TableCell padding={"checkbox"}>
+                          <Avatar
+                            style={{ width: 20, height: 20 }}
+                            alt={n.club}
+                            src={n.clubImage.replace("tiny", "medium")}
+                          />
+                        </TableCell>
                         <TableCell component="th" scope="row">
-                          {n.name}
+                          {n.club}
                         </TableCell>
-                        <TableCell numeric>
-                          {n.avgStars ? n.avgStars.toFixed(2) : "-"}
+                        <TableCell padding={"checkbox"}>
+                          {n.countryImage ? (
+                            <Avatar
+                              style={{ width: 20, height: 20 }}
+                              alt={n.country}
+                              src={n.countryImage.replace("tiny", "medium")}
+                            />
+                          ) : null}
                         </TableCell>
-                        <TableCell numeric>{n.numReviews}</TableCell>
+                        <TableCell>{n.country}</TableCell>
+                        <TableCell>
+                          {n.moneySpent.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "GBP",
+                            minimumFractionDigits: 0
+                          })}
+                        </TableCell>
                       </TableRow>
                     );
                   })}
@@ -211,4 +205,4 @@ class UserList extends React.Component {
   }
 }
 
-export default withStyles(styles)(UserList);
+export default withStyles(styles)(SpendingByClub);

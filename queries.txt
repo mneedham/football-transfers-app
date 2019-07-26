@@ -1,0 +1,16 @@
+# Find transfers done by Aston Villa
+query {
+  Club(name: "Aston Villa") {
+    id
+    name
+    transfers_to_club(orderBy:value_desc, first: 5) {
+      of_player {
+        name
+      }
+      from_club {
+        name
+      }
+      value
+    }
+  }
+}
