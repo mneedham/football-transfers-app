@@ -35,7 +35,7 @@ const styles = theme => ({
   }
 });
 
-class SpendingByClub extends React.Component {
+class MoneyInMoneyOut extends React.Component {
   constructor(props) {
     super(props);
 
@@ -74,7 +74,7 @@ class SpendingByClub extends React.Component {
     return (
       <Paper className={classes.root}>
         <Typography variant="h2" style={{ padding: "7px" }} gutterBottom>
-          Spending by club
+          Money In, Money Out
         </Typography>
         <TextField
           id="search"
@@ -235,4 +235,4 @@ class SpendingByClub extends React.Component {
   }
 }
 
-export default withStyles(styles)(SpendingByClub);
+export default withStyles(styles)(MoneyInMoneyOut);
