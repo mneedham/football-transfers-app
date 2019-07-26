@@ -35,16 +35,18 @@ const styles = theme => ({
   }
 });
 
-class SpendingByClub extends React.Component {
+class TopTransfers extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       order: "desc",
-      orderBy: "moneySpent",
+      orderBy: "value",
       page: 0,
       rowsPerPage: 10,
-      countryFilter: ""
+      countryFilter: "",
+      fromClubFilter: "",
+      toClubFilter: ""
     };
   }
 
@@ -57,6 +59,14 @@ class SpendingByClub extends React.Component {
     }
 
     this.setState({ order, orderBy });
+  };
+
+  getFromClubFilter = () => {
+    return { from_club: { name_contains: this.state.fromClubFilter } };
+  };
+
+  getToClubFilter = () => {
+    return { to_club: { name_contains: this.state.toClubFilter } };
   };
 
   handleFilterChange = filterName => event => {
@@ -74,14 +84,28 @@ class SpendingByClub extends React.Component {
     return (
       <Paper className={classes.root}>
         <Typography variant="h2" style={{ padding: "7px" }} gutterBottom>
-          Spending by club
+          Top Transfers
         </Typography>
         <TextField
-          id="search"
-          label="Country"
+          id="fromClub"
+          label="From Club"
           className={classes.textField}
-          value={this.state.countryFilter}
-          onChange={this.handleFilterChange("countryFilter")}
+          value={this.state.fromClubFilter}
+          onChange={this.handleFilterChange("fromClubFilter")}
+          margin="normal"
+          variant="outlined"
+          type="text"
+          InputProps={{
+            className: classes.input
+          }}
+        />
+
+        <TextField
+          id="toClub"
+          label="To Club"
+          className={classes.textField}
+          value={this.state.toClubFilter}
+          onChange={this.handleFilterChange("toClubFilter")}
           margin="normal"
           variant="outlined"
           type="text"
@@ -92,30 +116,42 @@ class SpendingByClub extends React.Component {
 
         <Query
           query={gql`
-            query topSpendingQuery(
-              $country: String
-              $orderBy: [_SpendingOrdering]
+            query topTransfers(
+              $orderBy: [_TransferOrdering]
               $first: Int
               $offset: Int
+              $filter: _TransferFilter
             ) {
-              spendingByClub(
-                countrySubstring: $country
-                orderBy: $orderBy
+              Transfer(
                 first: $first
+                orderBy: $orderBy
                 offset: $offset
+                filter: $filter
               ) {
-                moneySpent
-                country
-                club
-                clubImage
-                countryImage
+                date {
+                  formatted
+                }
+                value
+                id
+                of_player {
+                  name
+                  image
+                }
+                from_club {
+                  name
+                  image
+                }
+                to_club {
+                  name
+                  image
+                }
               }
             }
           `}
           variables={{
             first: this.state.rowsPerPage,
             offset: this.state.rowsPerPage * this.state.page,
-            country: this.state.countryFilter,
+            filter: { AND: [this.getFromClubFilter(), this.getToClubFilter()] },
             orderBy: this.state.orderBy + "_" + this.state.order
           }}
         >
@@ -128,18 +164,31 @@ class SpendingByClub extends React.Component {
                 <TableHead>
                   <TableRow>
                     <TableCell
+                      key="date"
+                      sortDirection={orderBy === "date" ? order : false}
+                    >
+                      Date
+                    </TableCell>
+                    <TableCell
+                      key="player"
+                      sortDirection={orderBy === "player" ? order : false}
+                      colSpan={2}
+                    >
+                      Player
+                    </TableCell>
+                    <TableCell
                       key="club"
                       sortDirection={orderBy === "club" ? order : false}
                       colSpan={2}
                     >
-                      Club
+                      From
                     </TableCell>
                     <TableCell
                       key="country"
                       sortDirection={orderBy === "country" ? order : false}
                       colSpan={2}
                     >
-                      Country
+                      To
                     </TableCell>
                     <TableCell
                       key="moneySpent"
@@ -151,42 +200,65 @@ class SpendingByClub extends React.Component {
                         enterDelay={300}
                       >
                         <TableSortLabel
-                          active={orderBy === "moneySpent"}
+                          active={orderBy === "value"}
                           direction={order}
-                          onClick={() => this.handleSortRequest("moneySpent")}
+                          onClick={() => this.handleSortRequest("value")}
                         >
-                          Amount Spent
+                          Transfer Fee
                         </TableSortLabel>
                       </Tooltip>
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {data.spendingByClub.map(n => {
+                  {data.Transfer.map(n => {
                     return (
-                      <TableRow key={n.club}>
-                        <TableCell padding={"checkbox"}>
-                          <Avatar
-                            style={{ width: 20, height: 20 }}
-                            alt={n.club}
-                            src={n.clubImage.replace("tiny", "medium")}
-                          />
-                        </TableCell>
+                      <TableRow key={n.id}>
                         <TableCell component="th" scope="row">
-                          {n.club}
+                          {n.date.formatted}
                         </TableCell>
                         <TableCell padding={"checkbox"}>
-                          {n.countryImage ? (
+                          {n.of_player[0].image ? (
                             <Avatar
                               style={{ width: 20, height: 20 }}
-                              alt={n.country}
-                              src={n.countryImage.replace("tiny", "medium")}
+                              alt={n.of_player[0].name}
+                              src={n.of_player[0].image.replace(
+                                "tiny",
+                                "medium"
+                              )}
                             />
                           ) : null}
                         </TableCell>
-                        <TableCell>{n.country}</TableCell>
+                        <TableCell component="th" scope="row">
+                          {n.of_player[0].name}
+                        </TableCell>
+                        <TableCell padding={"checkbox"}>
+                          {n.from_club[0].image ? (
+                            <Avatar
+                              style={{ width: 20, height: 20 }}
+                              alt={n.from_club[0].name}
+                              src={n.from_club[0].image.replace(
+                                "tiny",
+                                "medium"
+                              )}
+                            />
+                          ) : null}
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                          {n.from_club[0].name}
+                        </TableCell>
+                        <TableCell padding={"checkbox"}>
+                          {n.to_club[0].image ? (
+                            <Avatar
+                              style={{ width: 20, height: 20 }}
+                              alt={n.to_club[0].name}
+                              src={n.to_club[0].image.replace("tiny", "medium")}
+                            />
+                          ) : null}
+                        </TableCell>
+                        <TableCell>{n.to_club[0].name}</TableCell>
                         <TableCell>
-                          {n.moneySpent.toLocaleString("en-US", {
+                          {n.value.toLocaleString("en-US", {
                             style: "currency",
                             currency: "GBP",
                             minimumFractionDigits: 0
@@ -205,4 +277,4 @@ class SpendingByClub extends React.Component {
   }
 }
 
-export default withStyles(styles)(SpendingByClub);
+export default withStyles(styles)(TopTransfers);
