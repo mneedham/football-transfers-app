@@ -17,6 +17,7 @@ import {
   Image
 } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
+import TablePagination from "@material-ui/core/TablePagination";
 
 const styles = theme => ({
   root: {
@@ -75,6 +76,10 @@ class TopTransfers extends React.Component {
     this.setState({
       [filterName]: val
     });
+  };
+
+  handleChangeRowsPerPage = event => {
+    this.setState({ rowsPerPage: event.target.value });
   };
 
   render() {
@@ -160,115 +165,135 @@ class TopTransfers extends React.Component {
             if (error) return <p style={{ padding: "7px" }}>Error</p>;
 
             return (
-              <Table className={this.props.classes.table}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell
-                      key="date"
-                      sortDirection={orderBy === "date" ? order : false}
-                    >
-                      Date
-                    </TableCell>
-                    <TableCell
-                      key="player"
-                      sortDirection={orderBy === "player" ? order : false}
-                      colSpan={2}
-                    >
-                      Player
-                    </TableCell>
-                    <TableCell
-                      key="club"
-                      sortDirection={orderBy === "club" ? order : false}
-                      colSpan={2}
-                    >
-                      From
-                    </TableCell>
-                    <TableCell
-                      key="country"
-                      sortDirection={orderBy === "country" ? order : false}
-                      colSpan={2}
-                    >
-                      To
-                    </TableCell>
-                    <TableCell
-                      key="moneySpent"
-                      sortDirection={orderBy === "moneySpent" ? order : false}
-                    >
-                      <Tooltip
-                        title="Sort"
-                        placement="bottom-start"
-                        enterDelay={300}
+              <div>
+                <Table className={this.props.classes.table}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        key="date"
+                        sortDirection={orderBy === "date" ? order : false}
                       >
-                        <TableSortLabel
-                          active={orderBy === "value"}
-                          direction={order}
-                          onClick={() => this.handleSortRequest("value")}
+                        Date
+                      </TableCell>
+                      <TableCell
+                        key="player"
+                        sortDirection={orderBy === "player" ? order : false}
+                        colSpan={2}
+                      >
+                        Player
+                      </TableCell>
+                      <TableCell
+                        key="club"
+                        sortDirection={orderBy === "club" ? order : false}
+                        colSpan={2}
+                      >
+                        From
+                      </TableCell>
+                      <TableCell
+                        key="country"
+                        sortDirection={orderBy === "country" ? order : false}
+                        colSpan={2}
+                      >
+                        To
+                      </TableCell>
+                      <TableCell
+                        key="moneySpent"
+                        sortDirection={orderBy === "moneySpent" ? order : false}
+                      >
+                        <Tooltip
+                          title="Sort"
+                          placement="bottom-start"
+                          enterDelay={300}
                         >
-                          Transfer Fee
-                        </TableSortLabel>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data.Transfer.map(n => {
-                    return (
-                      <TableRow key={n.id}>
-                        <TableCell component="th" scope="row">
-                          {n.date.formatted}
-                        </TableCell>
-                        <TableCell padding={"checkbox"}>
-                          {n.of_player[0].image ? (
-                            <Avatar
-                              style={{ width: 20, height: 20 }}
-                              alt={n.of_player[0].name}
-                              src={n.of_player[0].image.replace(
-                                "tiny",
-                                "medium"
-                              )}
-                            />
-                          ) : null}
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          {n.of_player[0].name}
-                        </TableCell>
-                        <TableCell padding={"checkbox"}>
-                          {n.from_club[0].image ? (
-                            <Avatar
-                              style={{ width: 20, height: 20 }}
-                              alt={n.from_club[0].name}
-                              src={n.from_club[0].image.replace(
-                                "tiny",
-                                "medium"
-                              )}
-                            />
-                          ) : null}
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          {n.from_club[0].name}
-                        </TableCell>
-                        <TableCell padding={"checkbox"}>
-                          {n.to_club[0].image ? (
-                            <Avatar
-                              style={{ width: 20, height: 20 }}
-                              alt={n.to_club[0].name}
-                              src={n.to_club[0].image.replace("tiny", "medium")}
-                            />
-                          ) : null}
-                        </TableCell>
-                        <TableCell>{n.to_club[0].name}</TableCell>
-                        <TableCell>
-                          {n.value.toLocaleString("en-US", {
-                            style: "currency",
-                            currency: "GBP",
-                            minimumFractionDigits: 0
-                          })}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                          <TableSortLabel
+                            active={orderBy === "value"}
+                            direction={order}
+                            onClick={() => this.handleSortRequest("value")}
+                          >
+                            Transfer Fee
+                          </TableSortLabel>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {data.Transfer.map(n => {
+                      return (
+                        <TableRow key={n.id}>
+                          <TableCell component="th" scope="row">
+                            {n.date.formatted}
+                          </TableCell>
+                          <TableCell padding={"checkbox"}>
+                            {n.of_player[0].image ? (
+                              <Avatar
+                                style={{ width: 20, height: 20 }}
+                                alt={n.of_player[0].name}
+                                src={n.of_player[0].image.replace(
+                                  "tiny",
+                                  "medium"
+                                )}
+                              />
+                            ) : null}
+                          </TableCell>
+                          <TableCell component="th" scope="row">
+                            {n.of_player[0].name}
+                          </TableCell>
+                          <TableCell padding={"checkbox"}>
+                            {n.from_club[0].image ? (
+                              <Avatar
+                                style={{ width: 20, height: 20 }}
+                                alt={n.from_club[0].name}
+                                src={n.from_club[0].image.replace(
+                                  "tiny",
+                                  "medium"
+                                )}
+                              />
+                            ) : null}
+                          </TableCell>
+                          <TableCell component="th" scope="row">
+                            {n.from_club[0].name}
+                          </TableCell>
+                          <TableCell padding={"checkbox"}>
+                            {n.to_club[0].image ? (
+                              <Avatar
+                                style={{ width: 20, height: 20 }}
+                                alt={n.to_club[0].name}
+                                src={n.to_club[0].image.replace(
+                                  "tiny",
+                                  "medium"
+                                )}
+                              />
+                            ) : null}
+                          </TableCell>
+                          <TableCell>{n.to_club[0].name}</TableCell>
+                          <TableCell>
+                            {n.value.toLocaleString("en-US", {
+                              style: "currency",
+                              currency: "GBP",
+                              minimumFractionDigits: 0
+                            })}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={20}
+                  rowsPerPage={this.state.rowsPerPage}
+                  page={0}
+                  backIconButtonProps={{
+                    "aria-label": "previous page"
+                  }}
+                  nextIconButtonProps={{
+                    "aria-label": "next page"
+                  }}
+                  // onChangePage={handleChangePage}
+                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                />
+              </div>
             );
           }}
         </Query>
