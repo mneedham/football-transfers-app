@@ -49,6 +49,7 @@ type Spending {
     countryImage: String
     moneySpent: Int
     moneyReceived: Int
+    profit: Int
 }
 
 type Query {
@@ -59,7 +60,7 @@ type Query {
                   WITH club, country,
                        apoc.coll.sumLongs([(club)<-[:TO_CLUB]-(t) | t.value]) AS moneyOut,
                        apoc.coll.sumLongs([(club)<-[:FROM_CLUB]-(t) | t.value]) AS moneyIn
-                  RETURN { club: club.name, clubImage: club.image, country: country.name, countryImage: country.image, moneySpent: moneyOut, moneyReceived: moneyIn}"""
+                  RETURN { club: club.name, clubImage: club.image, country: country.name, countryImage: country.image, moneySpent: moneyOut, moneyReceived: moneyIn, profit: moneyIn - moneyOut}"""
   )
 }
 

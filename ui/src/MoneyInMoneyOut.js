@@ -31,7 +31,9 @@ const styles = theme => ({
   textField: {
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit,
-    minWidth: 300
+    minWidth: 300,
+    height: 50,
+    fontSize: "2em"
   }
 });
 
@@ -110,6 +112,7 @@ class MoneyInMoneyOut extends React.Component {
                 clubImage
                 countryImage
                 moneyReceived
+                profit
               }
             }
           `}
@@ -182,6 +185,24 @@ class MoneyInMoneyOut extends React.Component {
                         </TableSortLabel>
                       </Tooltip>
                     </TableCell>
+                    <TableCell
+                      key="profit"
+                      sortDirection={orderBy === "profit" ? order : false}
+                    >
+                      <Tooltip
+                        title="Sort"
+                        placement="bottom-start"
+                        enterDelay={300}
+                      >
+                        <TableSortLabel
+                          active={orderBy === "profit"}
+                          direction={order}
+                          onClick={() => this.handleSortRequest("profit")}
+                        >
+                          Profit
+                        </TableSortLabel>
+                      </Tooltip>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -217,6 +238,13 @@ class MoneyInMoneyOut extends React.Component {
                         </TableCell>
                         <TableCell>
                           {n.moneyReceived.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "GBP",
+                            minimumFractionDigits: 0
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          {n.profit.toLocaleString("en-US", {
                             style: "currency",
                             currency: "GBP",
                             minimumFractionDigits: 0
