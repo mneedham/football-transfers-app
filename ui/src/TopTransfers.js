@@ -97,9 +97,6 @@ class TopTransfers extends React.Component {
       this.state.fromClubFilter !== prevState.fromClubFilter ||
       this.state.toClubFilter !== prevState.toClubFilter
     ) {
-      console.log("update total row count");
-      console.log(this.state);
-      console.log(prevProps);
       this.updateTotalRowCount();
     }
   }
@@ -214,7 +211,8 @@ class TopTransfers extends React.Component {
           }}
         >
           {({ loading, error, data }) => {
-            if (loading) return <p style={{ padding: "7px" }}>Loading...</p>;
+            if (loading || !this.state.totalCount)
+              return <p style={{ padding: "7px" }}>Loading...</p>;
             if (error) return <p style={{ padding: "7px" }}>Error</p>;
 
             return (
