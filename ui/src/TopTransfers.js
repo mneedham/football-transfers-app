@@ -46,6 +46,7 @@ class TopTransfers extends React.Component {
       orderBy: "value",
       page: 0,
       rowsPerPage: 10,
+      totalCount: 0,
       countryFilter: "",
       fromClubFilter: "",
       toClubFilter: ""
@@ -211,8 +212,7 @@ class TopTransfers extends React.Component {
           }}
         >
           {({ loading, error, data }) => {
-            if (loading || !this.state.totalCount)
-              return <p style={{ padding: "7px" }}>Loading...</p>;
+            if (loading) return <p style={{ padding: "7px" }}>Loading...</p>;
             if (error) return <p style={{ padding: "7px" }}>Error</p>;
 
             return (
