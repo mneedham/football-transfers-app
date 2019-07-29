@@ -17,6 +17,8 @@ import {
   Image
 } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
+import TablePagination from "@material-ui/core/TablePagination";
+import { withApollo } from "react-apollo";
 
 const styles = theme => ({
   root: {
@@ -46,6 +48,7 @@ class MoneyInMoneyOut extends React.Component {
       orderBy: "moneySpent",
       page: 0,
       rowsPerPage: 10,
+      totalCount: 0,
       countryFilter: ""
     };
   }
@@ -67,6 +70,54 @@ class MoneyInMoneyOut extends React.Component {
     this.setState({
       [filterName]: val
     });
+  };
+
+  handleChangeRowsPerPage = event => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
+  handleChangePage = (event, newPage) => {
+    this.setState({ page: newPage });
+  };
+
+  componentDidMount() {
+    this.updateTotalRowCount();
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.state.countryFilter !== prevState.countryFilter) {
+      this.updateTotalRowCount();
+    }
+  }
+
+  updateTotalRowCount() {
+    this.props.client
+      .query({
+        query: gql`
+          query topSpendingQuery(
+            $country: String
+            $orderBy: [_SpendingOrdering]
+          ) {
+            spendingByClub(countrySubstring: $country, orderBy: $orderBy) {
+              club
+            }
+          }
+        `,
+        variables: {
+          country: this.state.countryFilter,
+          orderBy: this.state.orderBy + "_" + this.state.order
+        }
+      })
+      .then(result => {
+        const data = result.data;
+        if (data && data.spendingByClub) {
+          this.handleCount(data.spendingByClub.length);
+        }
+      });
+  }
+
+  handleCount = count => {
+    this.setState({ totalCount: count });
   };
 
   render() {
@@ -128,133 +179,150 @@ class MoneyInMoneyOut extends React.Component {
             if (error) return <p style={{ padding: "7px" }}>Error</p>;
 
             return (
-              <Table className={this.props.classes.table}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell
-                      key="club"
-                      sortDirection={orderBy === "club" ? order : false}
-                      colSpan={2}
-                    >
-                      Club
-                    </TableCell>
-                    <TableCell
-                      key="country"
-                      sortDirection={orderBy === "country" ? order : false}
-                      colSpan={2}
-                    >
-                      Country
-                    </TableCell>
-                    <TableCell
-                      key="moneySpent"
-                      sortDirection={orderBy === "moneySpent" ? order : false}
-                    >
-                      <Tooltip
-                        title="Sort"
-                        placement="bottom-start"
-                        enterDelay={300}
+              <div>
+                <Table className={this.props.classes.table}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        key="club"
+                        sortDirection={orderBy === "club" ? order : false}
+                        colSpan={2}
                       >
-                        <TableSortLabel
-                          active={orderBy === "moneySpent"}
-                          direction={order}
-                          onClick={() => this.handleSortRequest("moneySpent")}
-                        >
-                          Amount Spent
-                        </TableSortLabel>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell
-                      key="moneyReceived"
-                      sortDirection={
-                        orderBy === "moneyReceived" ? order : false
-                      }
-                    >
-                      <Tooltip
-                        title="Sort"
-                        placement="bottom-start"
-                        enterDelay={300}
+                        Club
+                      </TableCell>
+                      <TableCell
+                        key="country"
+                        sortDirection={orderBy === "country" ? order : false}
+                        colSpan={2}
                       >
-                        <TableSortLabel
-                          active={orderBy === "moneyReceived"}
-                          direction={order}
-                          onClick={() =>
-                            this.handleSortRequest("moneyReceived")
-                          }
-                        >
-                          Amount Received
-                        </TableSortLabel>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell
-                      key="profit"
-                      sortDirection={orderBy === "profit" ? order : false}
-                    >
-                      <Tooltip
-                        title="Sort"
-                        placement="bottom-start"
-                        enterDelay={300}
+                        Country
+                      </TableCell>
+                      <TableCell
+                        key="moneySpent"
+                        sortDirection={orderBy === "moneySpent" ? order : false}
                       >
-                        <TableSortLabel
-                          active={orderBy === "profit"}
-                          direction={order}
-                          onClick={() => this.handleSortRequest("profit")}
+                        <Tooltip
+                          title="Sort"
+                          placement="bottom-start"
+                          enterDelay={300}
                         >
-                          Profit
-                        </TableSortLabel>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data.spendingByClub.map(n => {
-                    return (
-                      <TableRow key={n.club}>
-                        <TableCell padding={"checkbox"}>
-                          <Avatar
-                            style={{ width: 20, height: 20 }}
-                            alt={n.club}
-                            src={n.clubImage.replace("tiny", "medium")}
-                          />
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          {n.club}
-                        </TableCell>
-                        <TableCell padding={"checkbox"}>
-                          {n.countryImage ? (
+                          <TableSortLabel
+                            active={orderBy === "moneySpent"}
+                            direction={order}
+                            onClick={() => this.handleSortRequest("moneySpent")}
+                          >
+                            Amount Spent
+                          </TableSortLabel>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell
+                        key="moneyReceived"
+                        sortDirection={
+                          orderBy === "moneyReceived" ? order : false
+                        }
+                      >
+                        <Tooltip
+                          title="Sort"
+                          placement="bottom-start"
+                          enterDelay={300}
+                        >
+                          <TableSortLabel
+                            active={orderBy === "moneyReceived"}
+                            direction={order}
+                            onClick={() =>
+                              this.handleSortRequest("moneyReceived")
+                            }
+                          >
+                            Amount Received
+                          </TableSortLabel>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell
+                        key="profit"
+                        sortDirection={orderBy === "profit" ? order : false}
+                      >
+                        <Tooltip
+                          title="Sort"
+                          placement="bottom-start"
+                          enterDelay={300}
+                        >
+                          <TableSortLabel
+                            active={orderBy === "profit"}
+                            direction={order}
+                            onClick={() => this.handleSortRequest("profit")}
+                          >
+                            Profit
+                          </TableSortLabel>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {data.spendingByClub.map(n => {
+                      return (
+                        <TableRow key={n.club}>
+                          <TableCell padding={"checkbox"}>
                             <Avatar
                               style={{ width: 20, height: 20 }}
-                              alt={n.country}
-                              src={n.countryImage.replace("tiny", "medium")}
+                              alt={n.club}
+                              src={n.clubImage.replace("tiny", "medium")}
                             />
-                          ) : null}
-                        </TableCell>
-                        <TableCell>{n.country}</TableCell>
-                        <TableCell>
-                          {n.moneySpent.toLocaleString("en-US", {
-                            style: "currency",
-                            currency: "GBP",
-                            minimumFractionDigits: 0
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          {n.moneyReceived.toLocaleString("en-US", {
-                            style: "currency",
-                            currency: "GBP",
-                            minimumFractionDigits: 0
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          {n.profit.toLocaleString("en-US", {
-                            style: "currency",
-                            currency: "GBP",
-                            minimumFractionDigits: 0
-                          })}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                          </TableCell>
+                          <TableCell component="th" scope="row">
+                            {n.club}
+                          </TableCell>
+                          <TableCell padding={"checkbox"}>
+                            {n.countryImage ? (
+                              <Avatar
+                                style={{ width: 20, height: 20 }}
+                                alt={n.country}
+                                src={n.countryImage.replace("tiny", "medium")}
+                              />
+                            ) : null}
+                          </TableCell>
+                          <TableCell>{n.country}</TableCell>
+                          <TableCell>
+                            {n.moneySpent.toLocaleString("en-US", {
+                              style: "currency",
+                              currency: "GBP",
+                              minimumFractionDigits: 0
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            {n.moneyReceived.toLocaleString("en-US", {
+                              style: "currency",
+                              currency: "GBP",
+                              minimumFractionDigits: 0
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            {n.profit.toLocaleString("en-US", {
+                              style: "currency",
+                              currency: "GBP",
+                              minimumFractionDigits: 0
+                            })}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+                <TablePagination
+                  rowsPerPageOptions={[10, 25, 50, 100]}
+                  component="div"
+                  count={this.state.totalCount}
+                  rowsPerPage={this.state.rowsPerPage}
+                  page={this.state.page}
+                  backIconButtonProps={{
+                    "aria-label": "previous page"
+                  }}
+                  nextIconButtonProps={{
+                    "aria-label": "next page"
+                  }}
+                  onChangePage={this.handleChangePage}
+                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                />
+              </div>
             );
           }}
         </Query>
@@ -263,4 +331,4 @@ class MoneyInMoneyOut extends React.Component {
   }
 }
 
-export default withStyles(styles)(MoneyInMoneyOut);
+export default withStyles(styles)(withApollo(MoneyInMoneyOut));
