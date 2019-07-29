@@ -1,5 +1,5 @@
 import React from "react";
-import { Query } from "react-apollo";
+import { Query, ApolloConsumer } from "react-apollo";
 import gql from "graphql-tag";
 import "./styles.css";
 import { withStyles } from "@material-ui/core/styles";
@@ -18,6 +18,7 @@ import {
 } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
 import TablePagination from "@material-ui/core/TablePagination";
+import { withApollo } from "react-apollo";
 
 const styles = theme => ({
   root: {
@@ -74,12 +75,64 @@ class TopTransfers extends React.Component {
     const val = event.target.value;
 
     this.setState({
-      [filterName]: val
+      [filterName]: val,
+      page: 0
     });
   };
 
   handleChangeRowsPerPage = event => {
     this.setState({ rowsPerPage: event.target.value });
+  };
+
+  handleChangePage = (event, newPage) => {
+    this.setState({ page: newPage });
+  };
+
+  componentDidMount() {
+    this.updateTotalRowCount();
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (
+      this.state.fromClubFilter !== prevState.fromClubFilter ||
+      this.state.toClubFilter !== prevState.toClubFilter
+    ) {
+      console.log("update total row count");
+      console.log(this.state);
+      console.log(prevProps);
+      this.updateTotalRowCount();
+    }
+  }
+
+  updateTotalRowCount() {
+    const filter = { AND: [this.getFromClubFilter(), this.getToClubFilter()] };
+    this.props.client
+      .query({
+        query: gql`
+          query topTransfersCount(
+            $orderBy: [_TransferOrdering]
+            $filter: _TransferFilter
+          ) {
+            Transfer(orderBy: $orderBy, filter: $filter) {
+              id
+            }
+          }
+        `,
+        variables: {
+          filter: filter,
+          orderBy: this.state.orderBy + "_" + this.state.order
+        }
+      })
+      .then(result => {
+        const data = result.data;
+        if (data && data.Transfer) {
+          this.handleCount(data.Transfer.length);
+        }
+      });
+  }
+
+  handleCount = count => {
+    this.setState({ totalCount: count });
   };
 
   render() {
@@ -279,18 +332,18 @@ class TopTransfers extends React.Component {
                   </TableBody>
                 </Table>
                 <TablePagination
-                  rowsPerPageOptions={[5, 10, 25]}
+                  rowsPerPageOptions={[10, 25, 50, 100]}
                   component="div"
-                  count={20}
+                  count={this.state.totalCount}
                   rowsPerPage={this.state.rowsPerPage}
-                  page={0}
+                  page={this.state.page}
                   backIconButtonProps={{
                     "aria-label": "previous page"
                   }}
                   nextIconButtonProps={{
                     "aria-label": "next page"
                   }}
-                  // onChangePage={handleChangePage}
+                  onChangePage={this.handleChangePage}
                   onChangeRowsPerPage={this.handleChangeRowsPerPage}
                 />
               </div>
@@ -302,4 +355,4 @@ class TopTransfers extends React.Component {
   }
 }
 
-export default withStyles(styles)(TopTransfers);
+export default withStyles(styles)(withApollo(TopTransfers));
