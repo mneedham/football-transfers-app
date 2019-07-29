@@ -39,6 +39,38 @@ const styles = theme => ({
   }
 });
 
+const TOTAL_COUNT_QUERY = gql`
+  query topSpendingQuery($country: String, $orderBy: [_SpendingOrdering]) {
+    spendingByClub(countrySubstring: $country, orderBy: $orderBy) {
+      club
+    }
+  }
+`;
+
+const QUERY = gql`
+  query topSpendingQuery(
+    $country: String
+    $orderBy: [_SpendingOrdering]
+    $first: Int
+    $offset: Int
+  ) {
+    spendingByClub(
+      countrySubstring: $country
+      orderBy: $orderBy
+      first: $first
+      offset: $offset
+    ) {
+      moneySpent
+      country
+      club
+      clubImage
+      countryImage
+      moneyReceived
+      profit
+    }
+  }
+`;
+
 class MoneyInMoneyOut extends React.Component {
   constructor(props) {
     super(props);
@@ -61,14 +93,15 @@ class MoneyInMoneyOut extends React.Component {
       order = "asc";
     }
 
-    this.setState({ order, orderBy });
+    this.setState({ order, orderBy, page: 0 });
   };
 
   handleFilterChange = filterName => event => {
     const val = event.target.value;
 
     this.setState({
-      [filterName]: val
+      [filterName]: val,
+      page: 0
     });
   };
 
@@ -93,16 +126,7 @@ class MoneyInMoneyOut extends React.Component {
   updateTotalRowCount() {
     this.props.client
       .query({
-        query: gql`
-          query topSpendingQuery(
-            $country: String
-            $orderBy: [_SpendingOrdering]
-          ) {
-            spendingByClub(countrySubstring: $country, orderBy: $orderBy) {
-              club
-            }
-          }
-        `,
+        query: TOTAL_COUNT_QUERY,
         variables: {
           country: this.state.countryFilter,
           orderBy: this.state.orderBy + "_" + this.state.order
@@ -144,29 +168,7 @@ class MoneyInMoneyOut extends React.Component {
         />
 
         <Query
-          query={gql`
-            query topSpendingQuery(
-              $country: String
-              $orderBy: [_SpendingOrdering]
-              $first: Int
-              $offset: Int
-            ) {
-              spendingByClub(
-                countrySubstring: $country
-                orderBy: $orderBy
-                first: $first
-                offset: $offset
-              ) {
-                moneySpent
-                country
-                club
-                clubImage
-                countryImage
-                moneyReceived
-                profit
-              }
-            }
-          `}
+          query={QUERY}
           variables={{
             first: this.state.rowsPerPage,
             offset: this.state.rowsPerPage * this.state.page,

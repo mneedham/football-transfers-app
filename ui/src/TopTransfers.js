@@ -37,6 +37,51 @@ const styles = theme => ({
   }
 });
 
+const TOTAL_COUNT_QUERY = gql`
+  query topTransfersCount(
+    $orderBy: [_TransferOrdering]
+    $filter: _TransferFilter
+  ) {
+    Transfer(orderBy: $orderBy, filter: $filter) {
+      id
+    }
+  }
+`;
+
+const QUERY = gql`
+  query topTransfers(
+    $orderBy: [_TransferOrdering]
+    $first: Int
+    $offset: Int
+    $filter: _TransferFilter
+  ) {
+    Transfer(
+      first: $first
+      orderBy: $orderBy
+      offset: $offset
+      filter: $filter
+    ) {
+      date {
+        formatted
+      }
+      value
+      id
+      of_player {
+        name
+        image
+      }
+      from_club {
+        name
+        image
+      }
+      to_club {
+        name
+        image
+      }
+    }
+  }
+`;
+
 class TopTransfers extends React.Component {
   constructor(props) {
     super(props);
@@ -61,7 +106,7 @@ class TopTransfers extends React.Component {
       order = "asc";
     }
 
-    this.setState({ order, orderBy });
+    this.setState({ order, orderBy, page: 0 });
   };
 
   getFromClubFilter = () => {
@@ -106,16 +151,7 @@ class TopTransfers extends React.Component {
     const filter = { AND: [this.getFromClubFilter(), this.getToClubFilter()] };
     this.props.client
       .query({
-        query: gql`
-          query topTransfersCount(
-            $orderBy: [_TransferOrdering]
-            $filter: _TransferFilter
-          ) {
-            Transfer(orderBy: $orderBy, filter: $filter) {
-              id
-            }
-          }
-        `,
+        query: TOTAL_COUNT_QUERY,
         variables: {
           filter: filter,
           orderBy: this.state.orderBy + "_" + this.state.order
@@ -171,39 +207,7 @@ class TopTransfers extends React.Component {
         />
 
         <Query
-          query={gql`
-            query topTransfers(
-              $orderBy: [_TransferOrdering]
-              $first: Int
-              $offset: Int
-              $filter: _TransferFilter
-            ) {
-              Transfer(
-                first: $first
-                orderBy: $orderBy
-                offset: $offset
-                filter: $filter
-              ) {
-                date {
-                  formatted
-                }
-                value
-                id
-                of_player {
-                  name
-                  image
-                }
-                from_club {
-                  name
-                  image
-                }
-                to_club {
-                  name
-                  image
-                }
-              }
-            }
-          `}
+          query={QUERY}
           variables={{
             first: this.state.rowsPerPage,
             offset: this.state.rowsPerPage * this.state.page,
