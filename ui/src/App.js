@@ -25,7 +25,8 @@ import {
   CompareArrows
 } from "@material-ui/icons";
 
-import SpendingByClub from "./MoneyInMoneyOut";
+import MoneyInMoneyOut from "./MoneyInMoneyOut";
+import MoneyFlow from "./MoneyFlow";
 import TopTransfers from "./TopTransfers";
 import classNames from "classnames";
 
@@ -197,6 +198,7 @@ class App extends Component {
                   </ListItemIcon>
                   <ListItemText primary="Money In, Money Out" />
                 </ListItem>
+
                 <ListItem
                   button
                   onClick={() => this.setSelectedView("TopTransfers")}
@@ -206,6 +208,16 @@ class App extends Component {
                   </ListItemIcon>
                   <ListItemText primary="Top Transfers" />
                 </ListItem>
+
+                <ListItem
+                  button
+                  onClick={() => this.setSelectedView("MoneyFlow")}
+                >
+                  <ListItemIcon>
+                    <AttachMoney />
+                  </ListItemIcon>
+                  <ListItemText primary="Money Flow" />
+                </ListItem>
               </div>
             </List>
           </Drawer>
@@ -214,13 +226,17 @@ class App extends Component {
 
             {/* FIXME: Use proper routing here instead  */}
             <Typography component="div" className={classes.chartContainer}>
-              {this.state.selectedView === "Home" ? <SpendingByClub /> : null}
+              {this.state.selectedView === "Home" ? <MoneyInMoneyOut /> : null}
+
               {this.state.selectedView === "MoneyInMoneyOut" ? (
-                <SpendingByClub />
+                <MoneyInMoneyOut />
               ) : null}
+
               {this.state.selectedView === "TopTransfers" ? (
                 <TopTransfers />
               ) : null}
+
+              {this.state.selectedView === "MoneyFlow" ? <MoneyFlow /> : null}
             </Typography>
           </main>
         </div>

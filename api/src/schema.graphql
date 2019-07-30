@@ -52,6 +52,18 @@ type Spending {
     profit: Int
 }
 
+type MoneyFlow {
+    fromCountry: String
+    fromCountryImage: String
+    toCountry: String
+    toCountryImage: String
+    totalFees: Int
+    player: String
+    playerImage: String
+    fee: Int
+    numberOfTransfers: Int
+}
+
 type Query {
   spendingByClub(countrySubstring: String = ""): [Spending]
   @cypher(
@@ -62,5 +74,30 @@ type Query {
                        apoc.coll.sumLongs([(club)<-[:FROM_CLUB]-(t) | t.value]) AS moneyIn
                   RETURN { club: club.name, clubImage: club.image, country: country.name, countryImage: country.image, moneySpent: moneyOut, moneyReceived: moneyIn, profit: moneyIn - moneyOut}"""
   )
+
+    moneyFlow(filter: _MoneyFlowFilter, orderBy: [_MoneyFlowOrdering]): [MoneyFlow]
+    @cypher(
+      statement: """MATCH (t:Transfer)-[:OF_PLAYER]->(player),
+                          (fromCountry)<-[:IN_COUNTRY]-(fromLeague),
+                          (fromLeague)<-[:IN_LEAGUE]-(from)<-[:FROM_CLUB]-(t),
+                          (t)-[:TO_CLUB]->(to)-[:IN_LEAGUE]->(toLeague),
+                          (toLeague)-[:IN_COUNTRY]->(toCountry)
+                    WITH *
+                    ORDER BY fromCountry, toCountry, t.value DESC
+                    WITH sum(t.value) AS totalFees,
+                         fromCountry, toCountry,
+                         collect({player: player, fee: t.value}) AS transfers
+                    WHERE fromCountry <> toCountry
+                    RETURN {fromCountry: fromCountry.name,
+                            fromCountryImage: fromCountry.image,
+                            toCountry: toCountry.name,
+                            toCountryImage: toCountry.image,
+                            totalFees: toInteger(totalFees),
+                            player: transfers[0].player.name,
+                            playerImage: transfers[0].player.image,
+                            fee: toInteger(transfers[0].fee),
+                            numberOfTransfers: size(transfers)}"""
+    )
+
 }
 
