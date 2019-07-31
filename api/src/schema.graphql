@@ -84,9 +84,7 @@ type Query {
                           (toLeague)-[:IN_COUNTRY]->(toCountry)
                     WITH *
                     ORDER BY fromCountry, toCountry, t.value DESC
-                    WITH sum(t.value) AS totalFees,
-                         fromCountry, toCountry,
-                         collect({player: player, fee: t.value}) AS transfers
+                    WITH sum(t.value) AS totalFees, fromCountry, toCountry, collect({player: player, fee: t.value}) AS transfers
                     WHERE fromCountry <> toCountry
                     RETURN {fromCountry: fromCountry.name,
                             fromCountryImage: fromCountry.image,

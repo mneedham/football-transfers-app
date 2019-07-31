@@ -48,8 +48,18 @@ const TOTAL_COUNT_QUERY = gql`
 `;
 
 const QUERY = gql`
-  query moneyFlow($orderBy: [_MoneyFlowOrdering], $filter: _MoneyFlowFilter) {
-    moneyFlow(orderBy: $orderBy, filter: $filter) {
+  query moneyFlow(
+    $orderBy: [_MoneyFlowOrdering]
+    $filter: _MoneyFlowFilter
+    $first: Int
+    $offset: Int
+  ) {
+    moneyFlow(
+      orderBy: $orderBy
+      filter: $filter
+      first: $first
+      offset: $offset
+    ) {
       fromCountry
       fromCountryImage
       toCountry
@@ -62,7 +72,7 @@ const QUERY = gql`
   }
 `;
 
-class MoneyInMoneyOut extends React.Component {
+class MoneyFlow extends React.Component {
   constructor(props) {
     super(props);
 
@@ -73,8 +83,8 @@ class MoneyInMoneyOut extends React.Component {
       rowsPerPage: 10,
       totalCount: 0,
       countryFilter: "",
-      fromClubFilter: "",
-      toClubFilter: ""
+      fromCountryFilter: "",
+      toCountryFilter: ""
     };
   }
 
@@ -119,7 +129,10 @@ class MoneyInMoneyOut extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.state.countryFilter !== prevState.countryFilter) {
+    if (
+      this.state.toCountryFilter !== prevState.toCountryFilter ||
+      this.state.fromCountryFilter !== prevState.fromCountryFilter
+    ) {
       this.updateTotalRowCount();
     }
   }
@@ -158,11 +171,25 @@ class MoneyInMoneyOut extends React.Component {
           Money Flow
         </Typography>
         <TextField
-          id="search"
-          label="Country"
+          id="fromCountry"
+          label="From Country"
           className={classes.textField}
-          value={this.state.countryFilter}
-          onChange={this.handleFilterChange("countryFilter")}
+          value={this.state.fromCountryFilter}
+          onChange={this.handleFilterChange("fromCountryFilter")}
+          margin="normal"
+          variant="outlined"
+          type="text"
+          InputProps={{
+            className: classes.input
+          }}
+        />
+
+        <TextField
+          id="toCountry"
+          label="To Country"
+          className={classes.textField}
+          value={this.state.toCountryFilter}
+          onChange={this.handleFilterChange("toCountryFilter")}
           margin="normal"
           variant="outlined"
           type="text"
@@ -226,30 +253,14 @@ class MoneyInMoneyOut extends React.Component {
                         </Tooltip>
                       </TableCell>
                       <TableCell
-                        key="moneyReceived"
-                        sortDirection={
-                          orderBy === "moneyReceived" ? order : false
-                        }
+                        key="player"
+                        sortDirection={orderBy === "player" ? order : false}
                       >
-                        <Tooltip
-                          title="Sort"
-                          placement="bottom-start"
-                          enterDelay={300}
-                        >
-                          <TableSortLabel
-                            active={orderBy === "moneyReceived"}
-                            direction={order}
-                            onClick={() =>
-                              this.handleSortRequest("moneyReceived")
-                            }
-                          >
-                            Amount Received
-                          </TableSortLabel>
-                        </Tooltip>
+                        Most Expensive Player
                       </TableCell>
                       <TableCell
-                        key="profit"
-                        sortDirection={orderBy === "profit" ? order : false}
+                        key="fee"
+                        sortDirection={orderBy === "fee" ? order : false}
                       >
                         <Tooltip
                           title="Sort"
@@ -257,11 +268,11 @@ class MoneyInMoneyOut extends React.Component {
                           enterDelay={300}
                         >
                           <TableSortLabel
-                            active={orderBy === "profit"}
+                            active={orderBy === "fee"}
                             direction={order}
-                            onClick={() => this.handleSortRequest("profit")}
+                            onClick={() => this.handleSortRequest("fee")}
                           >
-                            Profit
+                            Fee
                           </TableSortLabel>
                         </Tooltip>
                       </TableCell>
@@ -340,4 +351,4 @@ class MoneyInMoneyOut extends React.Component {
   }
 }
 
-export default withStyles(styles)(withApollo(MoneyInMoneyOut));
+export default withStyles(styles)(withApollo(MoneyFlow));
