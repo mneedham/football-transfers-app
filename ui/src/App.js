@@ -24,6 +24,7 @@ import {
   AttachMoney,
   CompareArrows
 } from "@material-ui/icons";
+import ThreeSixtyIcon from "@material-ui/icons/ThreeSixty";
 
 import MoneyInMoneyOut from "./MoneyInMoneyOut";
 import MoneyFlow from "./MoneyFlow";
@@ -214,7 +215,7 @@ class App extends Component {
                   onClick={() => this.setSelectedView("MoneyFlow")}
                 >
                   <ListItemIcon>
-                    <AttachMoney />
+                    <ThreeSixtyIcon />
                   </ListItemIcon>
                   <ListItemText primary="Money Flow" />
                 </ListItem>

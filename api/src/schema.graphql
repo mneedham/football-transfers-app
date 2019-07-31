@@ -58,10 +58,8 @@ type MoneyFlow {
     toCountry: String
     toCountryImage: String
     totalFees: Int
-    player: String
-    playerImage: String
-    fee: Int
-    numberOfTransfers: Int
+    country1Country2: Int
+    country2Country1: Int
 }
 
 type Query {
@@ -75,26 +73,31 @@ type Query {
                   RETURN { club: club.name, clubImage: club.image, country: country.name, countryImage: country.image, moneySpent: moneyOut, moneyReceived: moneyIn, profit: moneyIn - moneyOut}"""
   )
 
-    moneyFlow(filter: _MoneyFlowFilter, orderBy: [_MoneyFlowOrdering]): [MoneyFlow]
+    moneyFlow(countrySubstring: String = ""): [MoneyFlow]
     @cypher(
-      statement: """MATCH (t:Transfer)-[:OF_PLAYER]->(player),
-                          (fromCountry)<-[:IN_COUNTRY]-(fromLeague),
-                          (fromLeague)<-[:IN_LEAGUE]-(from)<-[:FROM_CLUB]-(t),
-                          (t)-[:TO_CLUB]->(to)-[:IN_LEAGUE]->(toLeague),
-                          (toLeague)-[:IN_COUNTRY]->(toCountry)
-                    WITH *
-                    ORDER BY fromCountry, toCountry, t.value DESC
-                    WITH sum(t.value) AS totalFees, fromCountry, toCountry, collect({player: player, fee: t.value}) AS transfers
-                    WHERE fromCountry <> toCountry
-                    RETURN {fromCountry: fromCountry.name,
-                            fromCountryImage: fromCountry.image,
-                            toCountry: toCountry.name,
-                            toCountryImage: toCountry.image,
-                            totalFees: toInteger(totalFees),
-                            player: transfers[0].player.name,
-                            playerImage: transfers[0].player.image,
-                            fee: toInteger(transfers[0].fee),
-                            numberOfTransfers: size(transfers)}"""
+      statement: """CALL apoc.when(
+                      $countrySubstring = '',
+                      'MATCH (country1:Country), (country2:Country) WHERE id(country1) < id(country2) RETURN country1, country2',
+                      'MATCH (country1:Country), (country2:Country) WHERE country1.name CONTAINS $countrySubstring AND country1 <> country2 RETURN country1, country2',
+                      {countrySubstring: $countrySubstring})
+                    YIELD value
+                    WITH value.country1 AS country1, value.country2 AS country2
+
+                    WITH country1, country2,
+                           apoc.coll.sumLongs([(country1)<-[:IN_COUNTRY]-()<-[:IN_LEAGUE]-()<-[:FROM_CLUB]-(t)-[:TO_CLUB]->()-[:IN_LEAGUE]->()-[:IN_COUNTRY]->(country2) | t.value]) AS country2ToCountry1,
+                           apoc.coll.sumLongs([(country2)<-[:IN_COUNTRY]-()<-[:IN_LEAGUE]-()<-[:FROM_CLUB]-(t)-[:TO_CLUB]->()-[:IN_LEAGUE]->()-[:IN_COUNTRY]->(country1) | t.value]) AS country1ToCountry2
+                    WITH country1, country2, country1ToCountry2, country2ToCountry1, country1ToCountry2 + country2ToCountry1 AS totalFees
+                    WHERE totalFees > 0
+                    RETURN {
+                        fromCountry: country1.name,
+                        fromCountryImage: country1.image,
+                        toCountry: country2.name,
+                        toCountryImage: country2.image,
+                        totalFees: totalFees,
+                        country1Country2: country1ToCountry2,
+                        country2Country1: country2ToCountry1
+                    }
+                    """
     )
 
 }

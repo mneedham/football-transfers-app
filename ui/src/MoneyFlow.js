@@ -40,8 +40,8 @@ const styles = theme => ({
 });
 
 const TOTAL_COUNT_QUERY = gql`
-  query moneyFlow($orderBy: [_MoneyFlowOrdering], $filter: _MoneyFlowFilter) {
-    moneyFlow(orderBy: $orderBy, filter: $filter) {
+  query moneyFlow($orderBy: [_MoneyFlowOrdering], $country: String) {
+    moneyFlow(orderBy: $orderBy, countrySubstring: $country) {
       fromCountry
     }
   }
@@ -50,13 +50,13 @@ const TOTAL_COUNT_QUERY = gql`
 const QUERY = gql`
   query moneyFlow(
     $orderBy: [_MoneyFlowOrdering]
-    $filter: _MoneyFlowFilter
+    $country: String
     $first: Int
     $offset: Int
   ) {
     moneyFlow(
       orderBy: $orderBy
-      filter: $filter
+      countrySubstring: $country
       first: $first
       offset: $offset
     ) {
@@ -65,9 +65,8 @@ const QUERY = gql`
       toCountry
       toCountryImage
       totalFees
-      player
-      playerImage
-      fee
+      country1Country2
+      country2Country1
     }
   }
 `;
@@ -82,9 +81,7 @@ class MoneyFlow extends React.Component {
       page: 0,
       rowsPerPage: 10,
       totalCount: 0,
-      countryFilter: "",
-      fromCountryFilter: "",
-      toCountryFilter: ""
+      countryFilter: ""
     };
   }
 
@@ -108,14 +105,6 @@ class MoneyFlow extends React.Component {
     });
   };
 
-  getFromCountryFilter = () => {
-    return { fromCountry_contains: this.state.fromCountryFilter };
-  };
-
-  getToCountryFilter = () => {
-    return { toCountry_contains: this.state.toCountryFilter };
-  };
-
   handleChangeRowsPerPage = event => {
     this.setState({ rowsPerPage: event.target.value });
   };
@@ -129,23 +118,17 @@ class MoneyFlow extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (
-      this.state.toCountryFilter !== prevState.toCountryFilter ||
-      this.state.fromCountryFilter !== prevState.fromCountryFilter
-    ) {
+    if (this.state.countryFilter !== prevState.countryFilter) {
       this.updateTotalRowCount();
     }
   }
 
   updateTotalRowCount() {
-    const filter = {
-      AND: [this.getFromCountryFilter(), this.getToCountryFilter()]
-    };
     this.props.client
       .query({
         query: TOTAL_COUNT_QUERY,
         variables: {
-          filter: filter,
+          country: this.state.countryFilter,
           orderBy: this.state.orderBy + "_" + this.state.order
         }
       })
@@ -171,25 +154,11 @@ class MoneyFlow extends React.Component {
           Money Flow
         </Typography>
         <TextField
-          id="fromCountry"
-          label="From Country"
+          id="country"
+          label="Country"
           className={classes.textField}
-          value={this.state.fromCountryFilter}
-          onChange={this.handleFilterChange("fromCountryFilter")}
-          margin="normal"
-          variant="outlined"
-          type="text"
-          InputProps={{
-            className: classes.input
-          }}
-        />
-
-        <TextField
-          id="toCountry"
-          label="To Country"
-          className={classes.textField}
-          value={this.state.toCountryFilter}
-          onChange={this.handleFilterChange("toCountryFilter")}
+          value={this.state.countryFilter}
+          onChange={this.handleFilterChange("countryFilter")}
           margin="normal"
           variant="outlined"
           type="text"
@@ -203,9 +172,7 @@ class MoneyFlow extends React.Component {
           variables={{
             first: this.state.rowsPerPage,
             offset: this.state.rowsPerPage * this.state.page,
-            filter: {
-              AND: [this.getFromCountryFilter(), this.getToCountryFilter()]
-            },
+            country: this.state.countryFilter,
             orderBy: this.state.orderBy + "_" + this.state.order
           }}
         >
@@ -225,14 +192,40 @@ class MoneyFlow extends React.Component {
                         }
                         colSpan={2}
                       >
-                        From Country
+                        <Tooltip
+                          title="Sort"
+                          placement="bottom-start"
+                          enterDelay={300}
+                        >
+                          <TableSortLabel
+                            active={orderBy === "fromCountry"}
+                            direction={order}
+                            onClick={() =>
+                              this.handleSortRequest("fromCountry")
+                            }
+                          >
+                            Country 1
+                          </TableSortLabel>
+                        </Tooltip>
                       </TableCell>
                       <TableCell
                         key="toCountry"
                         sortDirection={orderBy === "toCountry" ? order : false}
                         colSpan={2}
                       >
-                        To Country
+                        <Tooltip
+                          title="Sort"
+                          placement="bottom-start"
+                          enterDelay={300}
+                        >
+                          <TableSortLabel
+                            active={orderBy === "toCountry"}
+                            direction={order}
+                            onClick={() => this.handleSortRequest("toCountry")}
+                          >
+                            Country 2
+                          </TableSortLabel>
+                        </Tooltip>
                       </TableCell>
                       <TableCell
                         key="totalFees"
@@ -253,14 +246,10 @@ class MoneyFlow extends React.Component {
                         </Tooltip>
                       </TableCell>
                       <TableCell
-                        key="player"
-                        sortDirection={orderBy === "player" ? order : false}
-                      >
-                        Most Expensive Player
-                      </TableCell>
-                      <TableCell
-                        key="fee"
-                        sortDirection={orderBy === "fee" ? order : false}
+                        key="country1Country2"
+                        sortDirection={
+                          orderBy === "country1Country2" ? order : false
+                        }
                       >
                         <Tooltip
                           title="Sort"
@@ -268,11 +257,35 @@ class MoneyFlow extends React.Component {
                           enterDelay={300}
                         >
                           <TableSortLabel
-                            active={orderBy === "fee"}
+                            active={orderBy === "country1Country2"}
                             direction={order}
-                            onClick={() => this.handleSortRequest("fee")}
+                            onClick={() =>
+                              this.handleSortRequest("country1Country2")
+                            }
                           >
-                            Fee
+                            Country1->Country2
+                          </TableSortLabel>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell
+                        key="country2Country1"
+                        sortDirection={
+                          orderBy === "country2Country1" ? order : false
+                        }
+                      >
+                        <Tooltip
+                          title="Sort"
+                          placement="bottom-start"
+                          enterDelay={300}
+                        >
+                          <TableSortLabel
+                            active={orderBy === "country2Country1"}
+                            direction={order}
+                            onClick={() =>
+                              this.handleSortRequest("country2Country1")
+                            }
+                          >
+                            Country2->Country1
                           </TableSortLabel>
                         </Tooltip>
                       </TableCell>
@@ -314,9 +327,15 @@ class MoneyFlow extends React.Component {
                               minimumFractionDigits: 0
                             })}
                           </TableCell>
-                          <TableCell>{n.player}</TableCell>
                           <TableCell>
-                            {n.fee.toLocaleString("en-US", {
+                            {n.country1Country2.toLocaleString("en-US", {
+                              style: "currency",
+                              currency: "GBP",
+                              minimumFractionDigits: 0
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            {n.country2Country1.toLocaleString("en-US", {
                               style: "currency",
                               currency: "GBP",
                               minimumFractionDigits: 0
