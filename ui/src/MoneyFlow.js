@@ -192,7 +192,6 @@ class MoneyFlow extends React.Component {
                         sortDirection={
                           orderBy === "fromCountry" ? order : false
                         }
-                        colSpan={2}
                       >
                         <Tooltip
                           title="Sort"
@@ -224,7 +223,7 @@ class MoneyFlow extends React.Component {
                       <TableCell
                         key="toCountry"
                         sortDirection={orderBy === "toCountry" ? order : false}
-                        colSpan={2}
+                        align={"right"}
                       >
                         <Tooltip
                           title="Sort"
@@ -255,7 +254,7 @@ class MoneyFlow extends React.Component {
                             direction={order}
                             onClick={() => this.handleSortRequest("totalFees")}
                           >
-                            Total Fees
+                            Total Money Flow
                           </TableSortLabel>
                         </Tooltip>
                       </TableCell>
@@ -265,20 +264,27 @@ class MoneyFlow extends React.Component {
                     {data.moneyFlow.map(n => {
                       return (
                         <TableRow key={n.fromCountry + "_" + n.toCountry}>
-                          <TableCell padding={"checkbox"}>
-                            {n.fromCountryImage ? (
-                              <Avatar
-                                style={{ width: 20, height: 20 }}
-                                alt={n.fromCountry}
-                                src={n.fromCountryImage.replace(
-                                  "tiny",
-                                  "medium"
-                                )}
-                              />
-                            ) : null}
-                          </TableCell>
-                          <TableCell component="th" scope="row">
-                            {n.fromCountry}
+                          <TableCell align={"left"}>
+                            <div>
+                              {n.fromCountryImage ? (
+                                <Avatar
+                                  style={{
+                                    width: 20,
+                                    height: 20,
+                                    verticalAlign: "middle",
+                                    display: "inline-block",
+                                    marginRight: "8px"
+                                  }}
+                                  alt={n.fromCountry}
+                                  src={n.fromCountryImage.replace(
+                                    "tiny",
+                                    "medium"
+                                  )}
+                                />
+                              ) : null}
+
+                              {n.fromCountry}
+                            </div>
                           </TableCell>
 
                           <TableCell align={"right"}>
@@ -301,16 +307,28 @@ class MoneyFlow extends React.Component {
                             </div>
                           </TableCell>
 
-                          <TableCell padding={"checkbox"}>
-                            {n.toCountryImage ? (
-                              <Avatar
-                                style={{ width: 20, height: 20 }}
-                                alt={n.toCountry}
-                                src={n.toCountryImage.replace("tiny", "medium")}
-                              />
-                            ) : null}
+                          <TableCell align={"right"}>
+                            <div>
+                              {n.toCountry}
+                              {n.toCountryImage ? (
+                                <Avatar
+                                  style={{
+                                    width: 20,
+                                    height: 20,
+                                    verticalAlign: "middle",
+                                    display: "inline-block",
+                                    marginLeft: "8px"
+                                  }}
+                                  alt={n.toCountry}
+                                  src={n.toCountryImage.replace(
+                                    "tiny",
+                                    "medium"
+                                  )}
+                                />
+                              ) : null}
+                            </div>
                           </TableCell>
-                          <TableCell>{n.toCountry}</TableCell>
+
                           <TableCell>
                             {n.totalFees.toLocaleString("en-US", {
                               style: "currency",
