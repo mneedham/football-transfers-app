@@ -151,7 +151,7 @@ class MoneyInMoneyOut extends React.Component {
     return (
       <Paper className={classes.root}>
         <Typography variant="h2" style={{ padding: "7px" }} gutterBottom>
-          Money In, Money Out
+          Club Spending
         </Typography>
         <TextField
           id="search"

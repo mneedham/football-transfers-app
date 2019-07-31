@@ -176,7 +176,7 @@ class TopTransfers extends React.Component {
     return (
       <Paper className={classes.root}>
         <Typography variant="h2" style={{ padding: "7px" }} gutterBottom>
-          Top Transfers
+          Transfers
         </Typography>
         <TextField
           id="fromClub"

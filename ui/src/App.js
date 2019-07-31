@@ -19,8 +19,6 @@ import {
   Menu as MenuIcon,
   ChevronLeft as ChevronLeftIcon,
   Dashboard as DashboardIcon,
-  EventNote as EventNoteIcon,
-  People as PeopleIcon,
   AttachMoney,
   CompareArrows
 } from "@material-ui/icons";
@@ -197,7 +195,7 @@ class App extends Component {
                   <ListItemIcon>
                     <AttachMoney />
                   </ListItemIcon>
-                  <ListItemText primary="Money In, Money Out" />
+                  <ListItemText primary="Club Spending" />
                 </ListItem>
 
                 <ListItem
@@ -207,7 +205,7 @@ class App extends Component {
                   <ListItemIcon>
                     <CompareArrows />
                   </ListItemIcon>
-                  <ListItemText primary="Top Transfers" />
+                  <ListItemText primary="Transfers" />
                 </ListItem>
 
                 <ListItem
@@ -217,7 +215,7 @@ class App extends Component {
                   <ListItemIcon>
                     <ThreeSixtyIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Money Flow" />
+                  <ListItemText primary="Country Money Flow" />
                 </ListItem>
               </div>
             </List>

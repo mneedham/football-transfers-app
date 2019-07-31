@@ -20,6 +20,8 @@ import Avatar from "@material-ui/core/Avatar";
 import TablePagination from "@material-ui/core/TablePagination";
 import { withApollo } from "react-apollo";
 
+import { ArrowLeft, ArrowRight } from "@material-ui/icons";
+
 const styles = theme => ({
   root: {
     maxWidth: 1000,
@@ -151,7 +153,7 @@ class MoneyFlow extends React.Component {
     return (
       <Paper className={classes.root}>
         <Typography variant="h2" style={{ padding: "7px" }} gutterBottom>
-          Money Flow
+          Country Money Flow
         </Typography>
         <TextField
           id="country"
@@ -208,6 +210,17 @@ class MoneyFlow extends React.Component {
                           </TableSortLabel>
                         </Tooltip>
                       </TableCell>
+
+                      <TableCell
+                        key="country1Country2"
+                        sortDirection={
+                          orderBy === "country1Country2" ? order : false
+                        }
+                        align={"right"}
+                      >
+                        Money Flow
+                      </TableCell>
+
                       <TableCell
                         key="toCountry"
                         sortDirection={orderBy === "toCountry" ? order : false}
@@ -227,6 +240,7 @@ class MoneyFlow extends React.Component {
                           </TableSortLabel>
                         </Tooltip>
                       </TableCell>
+
                       <TableCell
                         key="totalFees"
                         sortDirection={orderBy === "totalFees" ? order : false}
@@ -242,50 +256,6 @@ class MoneyFlow extends React.Component {
                             onClick={() => this.handleSortRequest("totalFees")}
                           >
                             Total Fees
-                          </TableSortLabel>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell
-                        key="country1Country2"
-                        sortDirection={
-                          orderBy === "country1Country2" ? order : false
-                        }
-                      >
-                        <Tooltip
-                          title="Sort"
-                          placement="bottom-start"
-                          enterDelay={300}
-                        >
-                          <TableSortLabel
-                            active={orderBy === "country1Country2"}
-                            direction={order}
-                            onClick={() =>
-                              this.handleSortRequest("country1Country2")
-                            }
-                          >
-                            Country1->Country2
-                          </TableSortLabel>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell
-                        key="country2Country1"
-                        sortDirection={
-                          orderBy === "country2Country1" ? order : false
-                        }
-                      >
-                        <Tooltip
-                          title="Sort"
-                          placement="bottom-start"
-                          enterDelay={300}
-                        >
-                          <TableSortLabel
-                            active={orderBy === "country2Country1"}
-                            direction={order}
-                            onClick={() =>
-                              this.handleSortRequest("country2Country1")
-                            }
-                          >
-                            Country2->Country1
                           </TableSortLabel>
                         </Tooltip>
                       </TableCell>
@@ -310,6 +280,27 @@ class MoneyFlow extends React.Component {
                           <TableCell component="th" scope="row">
                             {n.fromCountry}
                           </TableCell>
+
+                          <TableCell align={"right"}>
+                            <div>
+                              {n.country1Country2.toLocaleString("en-US", {
+                                style: "currency",
+                                currency: "GBP",
+                                minimumFractionDigits: 0
+                              })}{" "}
+                              <ArrowRight style={{ verticalAlign: "middle" }} />
+                            </div>
+
+                            <div>
+                              {n.country2Country1.toLocaleString("en-US", {
+                                style: "currency",
+                                currency: "GBP",
+                                minimumFractionDigits: 0
+                              })}{" "}
+                              <ArrowLeft style={{ verticalAlign: "middle" }} />
+                            </div>
+                          </TableCell>
+
                           <TableCell padding={"checkbox"}>
                             {n.toCountryImage ? (
                               <Avatar
@@ -322,20 +313,6 @@ class MoneyFlow extends React.Component {
                           <TableCell>{n.toCountry}</TableCell>
                           <TableCell>
                             {n.totalFees.toLocaleString("en-US", {
-                              style: "currency",
-                              currency: "GBP",
-                              minimumFractionDigits: 0
-                            })}
-                          </TableCell>
-                          <TableCell>
-                            {n.country1Country2.toLocaleString("en-US", {
-                              style: "currency",
-                              currency: "GBP",
-                              minimumFractionDigits: 0
-                            })}
-                          </TableCell>
-                          <TableCell>
-                            {n.country2Country1.toLocaleString("en-US", {
                               style: "currency",
                               currency: "GBP",
                               minimumFractionDigits: 0
