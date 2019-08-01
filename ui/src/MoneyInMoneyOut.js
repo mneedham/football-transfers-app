@@ -188,14 +188,12 @@ class MoneyInMoneyOut extends React.Component {
                       <TableCell
                         key="club"
                         sortDirection={orderBy === "club" ? order : false}
-                        colSpan={2}
                       >
                         Club
                       </TableCell>
                       <TableCell
                         key="country"
                         sortDirection={orderBy === "country" ? order : false}
-                        colSpan={2}
                       >
                         Country
                       </TableCell>
@@ -263,26 +261,46 @@ class MoneyInMoneyOut extends React.Component {
                     {data.spendingByClub.map(n => {
                       return (
                         <TableRow key={n.club}>
-                          <TableCell padding={"checkbox"}>
-                            <Avatar
-                              style={{ width: 20, height: 20 }}
-                              alt={n.club}
-                              src={n.clubImage.replace("tiny", "medium")}
-                            />
+                          <TableCell align={"left"}>
+                            <div>
+                              {n.clubImage ? (
+                                <Avatar
+                                  style={{
+                                    width: 20,
+                                    height: 20,
+                                    verticalAlign: "middle",
+                                    display: "inline-block",
+                                    marginRight: "8px"
+                                  }}
+                                  alt={n.club}
+                                  src={n.clubImage.replace("tiny", "medium")}
+                                />
+                              ) : null}
+
+                              {n.club}
+                            </div>
                           </TableCell>
-                          <TableCell component="th" scope="row">
-                            {n.club}
+
+                          <TableCell align={"left"}>
+                            <div>
+                              {n.countryImage ? (
+                                <Avatar
+                                  style={{
+                                    width: 20,
+                                    height: 20,
+                                    verticalAlign: "middle",
+                                    display: "inline-block",
+                                    marginRight: "8px"
+                                  }}
+                                  alt={n.country}
+                                  src={n.countryImage.replace("tiny", "medium")}
+                                />
+                              ) : null}
+
+                              {n.country}
+                            </div>
                           </TableCell>
-                          <TableCell padding={"checkbox"}>
-                            {n.countryImage ? (
-                              <Avatar
-                                style={{ width: 20, height: 20 }}
-                                alt={n.country}
-                                src={n.countryImage.replace("tiny", "medium")}
-                              />
-                            ) : null}
-                          </TableCell>
-                          <TableCell>{n.country}</TableCell>
+
                           <TableCell>
                             {n.moneySpent.toLocaleString("en-US", {
                               style: "currency",
