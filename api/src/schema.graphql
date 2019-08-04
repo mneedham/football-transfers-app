@@ -3,7 +3,7 @@ type Club {
    id: String!
    image: String
    name: String!
-   in_league: [League] @relation(name: "IN_LEAGUE", direction: "OUT")
+   in_league: League @relation(name: "IN_LEAGUE", direction: "OUT")
    transfers_from_club: [Transfer] @relation(name: "FROM_CLUB", direction: "IN")
    transfers_to_club: [Transfer] @relation(name: "TO_CLUB", direction: "IN")
 }
@@ -23,7 +23,7 @@ type League {
    href: String
    id: String!
    name: String!
-   in_country: [Country] @relation(name: "IN_COUNTRY", direction: "OUT")
+   in_country: Country @relation(name: "IN_COUNTRY", direction: "OUT")
    clubs: [Club] @relation(name: "IN_LEAGUE", direction: "IN")
 }
 

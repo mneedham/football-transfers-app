@@ -28,6 +28,9 @@ import MoneyInMoneyOut from "./MoneyInMoneyOut";
 import MoneyFlow from "./MoneyFlow";
 import TopTransfers from "./TopTransfers";
 import classNames from "classnames";
+import { Router, Link } from "@reach/router";
+import { navigate } from "@reach/router";
+import CountryToCountryMoneyFlow from "./CountryToCountryMoneyFlow";
 
 const drawerWidth = 240;
 
@@ -126,6 +129,13 @@ class App extends Component {
   render() {
     const { classes } = this.props;
 
+    const TransfersRoute = () => <TopTransfers />;
+    const ClubSpendingRoute = () => <MoneyInMoneyOut />;
+    const CountryMoneyFlowRoute = () => <MoneyFlow />;
+    const CountryToCountryMoneyFlowRoute = props => (
+      <CountryToCountryMoneyFlow uriProps={props} />
+    );
+
     return (
       <React.Fragment>
         <CssBaseline />
@@ -181,37 +191,28 @@ class App extends Component {
             <Divider />
             <List>
               <div>
-                <ListItem button onClick={() => this.setSelectedView("Home")}>
+                <ListItem button onClick={() => navigate("/")}>
                   <ListItemIcon>
                     <DashboardIcon />
                   </ListItemIcon>
                   <ListItemText primary="Home" />
                 </ListItem>
 
-                <ListItem
-                  button
-                  onClick={() => this.setSelectedView("MoneyInMoneyOut")}
-                >
-                  <ListItemIcon>
-                    <AttachMoney />
-                  </ListItemIcon>
-                  <ListItemText primary="Club Spending" />
-                </ListItem>
-
-                <ListItem
-                  button
-                  onClick={() => this.setSelectedView("TopTransfers")}
-                >
+                <ListItem button onClick={() => navigate("/transfers")}>
                   <ListItemIcon>
                     <CompareArrows />
                   </ListItemIcon>
                   <ListItemText primary="Transfers" />
                 </ListItem>
 
-                <ListItem
-                  button
-                  onClick={() => this.setSelectedView("MoneyFlow")}
-                >
+                <ListItem button onClick={() => navigate("/club-spending")}>
+                  <ListItemIcon>
+                    <AttachMoney />
+                  </ListItemIcon>
+                  <ListItemText primary="Club Spending" />
+                </ListItem>
+
+                <ListItem button onClick={() => navigate("/money-flow")}>
                   <ListItemIcon>
                     <ThreeSixtyIcon />
                   </ListItemIcon>
@@ -225,17 +226,13 @@ class App extends Component {
 
             {/* FIXME: Use proper routing here instead  */}
             <Typography component="div" className={classes.chartContainer}>
-              {this.state.selectedView === "Home" ? <MoneyInMoneyOut /> : null}
-
-              {this.state.selectedView === "MoneyInMoneyOut" ? (
-                <MoneyInMoneyOut />
-              ) : null}
-
-              {this.state.selectedView === "TopTransfers" ? (
-                <TopTransfers />
-              ) : null}
-
-              {this.state.selectedView === "MoneyFlow" ? <MoneyFlow /> : null}
+              <Router>
+                <TransfersRoute path="/" />
+                <TransfersRoute path="transfers" />
+                <ClubSpendingRoute path="club-spending" />
+                <CountryMoneyFlowRoute path="money-flow" />
+                <CountryToCountryMoneyFlowRoute path="money-flow/:country1/:country2" />
+              </Router>
             </Typography>
           </main>
         </div>

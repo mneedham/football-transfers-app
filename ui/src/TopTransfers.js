@@ -233,21 +233,18 @@ class TopTransfers extends React.Component {
                       <TableCell
                         key="player"
                         sortDirection={orderBy === "player" ? order : false}
-                        colSpan={2}
                       >
                         Player
                       </TableCell>
                       <TableCell
                         key="club"
                         sortDirection={orderBy === "club" ? order : false}
-                        colSpan={2}
                       >
                         From
                       </TableCell>
                       <TableCell
                         key="country"
                         sortDirection={orderBy === "country" ? order : false}
-                        colSpan={2}
                       >
                         To
                       </TableCell>
@@ -278,49 +275,76 @@ class TopTransfers extends React.Component {
                           <TableCell component="th" scope="row">
                             {n.date.formatted}
                           </TableCell>
-                          <TableCell padding={"checkbox"}>
-                            {n.of_player[0].image ? (
-                              <Avatar
-                                style={{ width: 20, height: 20 }}
-                                alt={n.of_player[0].name}
-                                src={n.of_player[0].image.replace(
-                                  "tiny",
-                                  "medium"
-                                )}
-                              />
-                            ) : null}
+
+                          <TableCell align={"left"}>
+                            <div>
+                              {n.of_player[0].image ? (
+                                <Avatar
+                                  style={{
+                                    width: 20,
+                                    height: 20,
+                                    verticalAlign: "middle",
+                                    display: "inline-block",
+                                    marginRight: "8px"
+                                  }}
+                                  alt={n.of_player[0].name}
+                                  src={n.of_player[0].image.replace(
+                                    "tiny",
+                                    "medium"
+                                  )}
+                                />
+                              ) : null}
+
+                              {n.of_player[0].name}
+                            </div>
                           </TableCell>
-                          <TableCell component="th" scope="row">
-                            {n.of_player[0].name}
+
+                          <TableCell align={"left"}>
+                            <div>
+                              {n.from_club[0].image ? (
+                                <Avatar
+                                  style={{
+                                    width: 20,
+                                    height: 20,
+                                    verticalAlign: "middle",
+                                    display: "inline-block",
+                                    marginRight: "8px"
+                                  }}
+                                  alt={n.from_club[0].name}
+                                  src={n.from_club[0].image.replace(
+                                    "tiny",
+                                    "medium"
+                                  )}
+                                />
+                              ) : null}
+
+                              {n.from_club[0].name}
+                            </div>
                           </TableCell>
-                          <TableCell padding={"checkbox"}>
-                            {n.from_club[0].image ? (
-                              <Avatar
-                                style={{ width: 20, height: 20 }}
-                                alt={n.from_club[0].name}
-                                src={n.from_club[0].image.replace(
-                                  "tiny",
-                                  "medium"
-                                )}
-                              />
-                            ) : null}
+
+                          <TableCell align={"left"}>
+                            <div>
+                              {n.to_club[0].image ? (
+                                <Avatar
+                                  style={{
+                                    width: 20,
+                                    height: 20,
+                                    verticalAlign: "middle",
+                                    display: "inline-block",
+                                    marginRight: "8px"
+                                  }}
+                                  alt={n.to_club[0].name}
+                                  src={n.to_club[0].image.replace(
+                                    "tiny",
+                                    "medium"
+                                  )}
+                                />
+                              ) : null}
+
+                              {n.to_club[0].name}
+                            </div>
                           </TableCell>
-                          <TableCell component="th" scope="row">
-                            {n.from_club[0].name}
-                          </TableCell>
-                          <TableCell padding={"checkbox"}>
-                            {n.to_club[0].image ? (
-                              <Avatar
-                                style={{ width: 20, height: 20 }}
-                                alt={n.to_club[0].name}
-                                src={n.to_club[0].image.replace(
-                                  "tiny",
-                                  "medium"
-                                )}
-                              />
-                            ) : null}
-                          </TableCell>
-                          <TableCell>{n.to_club[0].name}</TableCell>
+
                           <TableCell>
                             {n.value.toLocaleString("en-US", {
                               style: "currency",

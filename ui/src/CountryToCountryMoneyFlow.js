@@ -1,5 +1,5 @@
 import React from "react";
-import { Query } from "react-apollo";
+import { Query, ApolloConsumer } from "react-apollo";
 import gql from "graphql-tag";
 import "./styles.css";
 import { withStyles } from "@material-ui/core/styles";
@@ -20,15 +20,7 @@ import Avatar from "@material-ui/core/Avatar";
 import TablePagination from "@material-ui/core/TablePagination";
 import { withApollo } from "react-apollo";
 
-import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowRightSharp,
-  ArrowRightRounded
-} from "@material-ui/icons";
-import Fab from "@material-ui/core/Fab";
-import AddIcon from "@material-ui/icons/Add";
-import { navigate } from "@reach/router";
+import { CompareArrows } from "@material-ui/icons";
 
 const styles = theme => ({
   root: {
@@ -43,55 +35,68 @@ const styles = theme => ({
   textField: {
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit,
-    minWidth: 300,
-    height: 50,
-    fontSize: "2em"
+    minWidth: 300
   }
 });
 
 const TOTAL_COUNT_QUERY = gql`
-  query moneyFlow($orderBy: [_MoneyFlowOrdering], $country: String) {
-    moneyFlow(orderBy: $orderBy, countrySubstring: $country) {
-      fromCountry
+  query topTransfersCount(
+    $orderBy: [_TransferOrdering]
+    $filter: _TransferFilter
+  ) {
+    Transfer(orderBy: $orderBy, filter: $filter) {
+      id
     }
   }
 `;
 
 const QUERY = gql`
-  query moneyFlow(
-    $orderBy: [_MoneyFlowOrdering]
-    $country: String
+  query topTransfers(
+    $orderBy: [_TransferOrdering]
     $first: Int
     $offset: Int
+    $filter: _TransferFilter
   ) {
-    moneyFlow(
-      orderBy: $orderBy
-      countrySubstring: $country
+    Transfer(
       first: $first
+      orderBy: $orderBy
       offset: $offset
+      filter: $filter
     ) {
-      fromCountry
-      fromCountryImage
-      toCountry
-      toCountryImage
-      totalFees
-      country1Country2
-      country2Country1
+      date {
+        formatted
+      }
+      value
+      id
+      of_player {
+        name
+        image
+      }
+      from_club {
+        name
+        image
+      }
+      to_club {
+        name
+        image
+      }
     }
   }
 `;
 
-class MoneyFlow extends React.Component {
+class CountryToCountry extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       order: "desc",
-      orderBy: "totalFees",
+      orderBy: "value",
       page: 0,
       rowsPerPage: 10,
       totalCount: 0,
-      countryFilter: ""
+      countryFilter: "",
+      fromClubFilter: "",
+      toClubFilter: ""
     };
   }
 
@@ -106,13 +111,35 @@ class MoneyFlow extends React.Component {
     this.setState({ order, orderBy, page: 0 });
   };
 
-  handleFilterChange = filterName => event => {
-    const val = event.target.value;
+  getFromCountryFilter = country => {
+    return {
+      from_club: { in_league: { in_country: { name_contains: country } } }
+    };
+  };
 
-    this.setState({
-      [filterName]: val,
-      page: 0
-    });
+  getToCountryFilter = country => {
+    return {
+      to_club: { in_league: { in_country: { name_contains: country } } }
+    };
+  };
+
+  getFilter = () => {
+    return {
+      OR: [
+        {
+          AND: [
+            this.getFromCountryFilter(this.props.uriProps.country1),
+            this.getToCountryFilter(this.props.uriProps.country2)
+          ]
+        },
+        {
+          AND: [
+            this.getFromCountryFilter(this.props.uriProps.country2),
+            this.getToCountryFilter(this.props.uriProps.country1)
+          ]
+        }
+      ]
+    };
   };
 
   handleChangeRowsPerPage = event => {
@@ -128,7 +155,10 @@ class MoneyFlow extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.state.countryFilter !== prevState.countryFilter) {
+    if (
+      this.state.fromClubFilter !== prevState.fromClubFilter ||
+      this.state.toClubFilter !== prevState.toClubFilter
+    ) {
       this.updateTotalRowCount();
     }
   }
@@ -138,14 +168,14 @@ class MoneyFlow extends React.Component {
       .query({
         query: TOTAL_COUNT_QUERY,
         variables: {
-          country: this.state.countryFilter,
+          filter: this.getFilter(),
           orderBy: this.state.orderBy + "_" + this.state.order
         }
       })
       .then(result => {
         const data = result.data;
-        if (data && data.moneyFlow) {
-          this.handleCount(data.moneyFlow.length);
+        if (data && data.Transfer) {
+          this.handleCount(data.Transfer.length);
         }
       });
   }
@@ -161,28 +191,16 @@ class MoneyFlow extends React.Component {
     return (
       <Paper className={classes.root}>
         <Typography variant="h2" style={{ padding: "7px" }} gutterBottom>
-          Country Money Flow
+          {this.props.uriProps.country1} <CompareArrows fontSize={"large"} />{" "}
+          {this.props.uriProps.country2} Transfers
         </Typography>
-        <TextField
-          id="country"
-          label="Country"
-          className={classes.textField}
-          value={this.state.countryFilter}
-          onChange={this.handleFilterChange("countryFilter")}
-          margin="normal"
-          variant="outlined"
-          type="text"
-          InputProps={{
-            className: classes.input
-          }}
-        />
 
         <Query
           query={QUERY}
           variables={{
             first: this.state.rowsPerPage,
             offset: this.state.rowsPerPage * this.state.page,
-            country: this.state.countryFilter,
+            filter: this.getFilter(),
             orderBy: this.state.orderBy + "_" + this.state.order
           }}
         >
@@ -196,10 +214,32 @@ class MoneyFlow extends React.Component {
                   <TableHead>
                     <TableRow>
                       <TableCell
-                        key="fromCountry"
-                        sortDirection={
-                          orderBy === "fromCountry" ? order : false
-                        }
+                        key="date"
+                        sortDirection={orderBy === "date" ? order : false}
+                      >
+                        Date
+                      </TableCell>
+                      <TableCell
+                        key="player"
+                        sortDirection={orderBy === "player" ? order : false}
+                      >
+                        Player
+                      </TableCell>
+                      <TableCell
+                        key="club"
+                        sortDirection={orderBy === "club" ? order : false}
+                      >
+                        From
+                      </TableCell>
+                      <TableCell
+                        key="country"
+                        sortDirection={orderBy === "country" ? order : false}
+                      >
+                        To
+                      </TableCell>
+                      <TableCell
+                        key="moneySpent"
+                        sortDirection={orderBy === "moneySpent" ? order : false}
                       >
                         <Tooltip
                           title="Sort"
@@ -207,75 +247,27 @@ class MoneyFlow extends React.Component {
                           enterDelay={300}
                         >
                           <TableSortLabel
-                            active={orderBy === "fromCountry"}
+                            active={orderBy === "value"}
                             direction={order}
-                            onClick={() =>
-                              this.handleSortRequest("fromCountry")
-                            }
+                            onClick={() => this.handleSortRequest("value")}
                           >
-                            Country 1
+                            Transfer Fee
                           </TableSortLabel>
                         </Tooltip>
                       </TableCell>
-
-                      <TableCell
-                        key="country1Country2"
-                        sortDirection={
-                          orderBy === "country1Country2" ? order : false
-                        }
-                        align={"right"}
-                      >
-                        Money Flow
-                      </TableCell>
-
-                      <TableCell
-                        key="toCountry"
-                        sortDirection={orderBy === "toCountry" ? order : false}
-                        align={"right"}
-                      >
-                        <Tooltip
-                          title="Sort"
-                          placement="bottom-start"
-                          enterDelay={300}
-                        >
-                          <TableSortLabel
-                            active={orderBy === "toCountry"}
-                            direction={order}
-                            onClick={() => this.handleSortRequest("toCountry")}
-                          >
-                            Country 2
-                          </TableSortLabel>
-                        </Tooltip>
-                      </TableCell>
-
-                      <TableCell
-                        key="totalFees"
-                        sortDirection={orderBy === "totalFees" ? order : false}
-                      >
-                        <Tooltip
-                          title="Sort"
-                          placement="bottom-start"
-                          enterDelay={300}
-                        >
-                          <TableSortLabel
-                            active={orderBy === "totalFees"}
-                            direction={order}
-                            onClick={() => this.handleSortRequest("totalFees")}
-                          >
-                            Total Money Flow
-                          </TableSortLabel>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell />
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {data.moneyFlow.map(n => {
+                    {data.Transfer.map(n => {
                       return (
-                        <TableRow key={n.fromCountry + "_" + n.toCountry}>
+                        <TableRow key={n.id}>
+                          <TableCell component="th" scope="row">
+                            {n.date.formatted}
+                          </TableCell>
+
                           <TableCell align={"left"}>
                             <div>
-                              {n.fromCountryImage ? (
+                              {n.of_player[0].image ? (
                                 <Avatar
                                   style={{
                                     width: 20,
@@ -284,83 +276,70 @@ class MoneyFlow extends React.Component {
                                     display: "inline-block",
                                     marginRight: "8px"
                                   }}
-                                  alt={n.fromCountry}
-                                  src={n.fromCountryImage.replace(
+                                  alt={n.of_player[0].name}
+                                  src={n.of_player[0].image.replace(
                                     "tiny",
                                     "medium"
                                   )}
                                 />
                               ) : null}
 
-                              {n.fromCountry}
+                              {n.of_player[0].name}
                             </div>
                           </TableCell>
 
-                          <TableCell align={"right"}>
+                          <TableCell align={"left"}>
                             <div>
-                              {n.country1Country2.toLocaleString("en-US", {
-                                style: "currency",
-                                currency: "GBP",
-                                minimumFractionDigits: 0
-                              })}{" "}
-                              <ArrowRight style={{ verticalAlign: "middle" }} />
-                            </div>
-
-                            <div>
-                              {n.country2Country1.toLocaleString("en-US", {
-                                style: "currency",
-                                currency: "GBP",
-                                minimumFractionDigits: 0
-                              })}{" "}
-                              <ArrowLeft style={{ verticalAlign: "middle" }} />
-                            </div>
-                          </TableCell>
-
-                          <TableCell align={"right"}>
-                            <div>
-                              {n.toCountry}
-                              {n.toCountryImage ? (
+                              {n.from_club[0].image ? (
                                 <Avatar
                                   style={{
                                     width: 20,
                                     height: 20,
                                     verticalAlign: "middle",
                                     display: "inline-block",
-                                    marginLeft: "8px"
+                                    marginRight: "8px"
                                   }}
-                                  alt={n.toCountry}
-                                  src={n.toCountryImage.replace(
+                                  alt={n.from_club[0].name}
+                                  src={n.from_club[0].image.replace(
                                     "tiny",
                                     "medium"
                                   )}
                                 />
                               ) : null}
+
+                              {n.from_club[0].name}
+                            </div>
+                          </TableCell>
+
+                          <TableCell align={"left"}>
+                            <div>
+                              {n.to_club[0].image ? (
+                                <Avatar
+                                  style={{
+                                    width: 20,
+                                    height: 20,
+                                    verticalAlign: "middle",
+                                    display: "inline-block",
+                                    marginRight: "8px"
+                                  }}
+                                  alt={n.to_club[0].name}
+                                  src={n.to_club[0].image.replace(
+                                    "tiny",
+                                    "medium"
+                                  )}
+                                />
+                              ) : null}
+
+                              {n.to_club[0].name}
                             </div>
                           </TableCell>
 
                           <TableCell>
-                            {n.totalFees.toLocaleString("en-US", {
+                            {n.value.toLocaleString("en-US", {
                               style: "currency",
                               currency: "GBP",
                               minimumFractionDigits: 0
                             })}
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              onClick={() =>
-                                navigate(
-                                  "/money-flow/" +
-                                    n.fromCountry +
-                                    "/" +
-                                    n.toCountry
-                                )
-                              }
-                            >
-                              {"More"}
-                              <ArrowRightRounded
-                                style={{ verticalAlign: "middle" }}
-                              />
-                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -391,4 +370,4 @@ class MoneyFlow extends React.Component {
   }
 }
 
-export default withStyles(styles)(withApollo(MoneyFlow));
+export default withStyles(styles)(withApollo(CountryToCountry));
