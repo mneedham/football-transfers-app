@@ -24,13 +24,14 @@ import {
 } from "@material-ui/icons";
 import ThreeSixtyIcon from "@material-ui/icons/ThreeSixty";
 
-import MoneyInMoneyOut from "./MoneyInMoneyOut";
+import Clubs from "./Clubs";
 import MoneyFlow from "./MoneyFlow";
 import TopTransfers from "./TopTransfers";
 import classNames from "classnames";
 import { Router, Link } from "@reach/router";
 import { navigate } from "@reach/router";
-import CountryToCountryMoneyFlow from "./CountryToCountryMoneyFlow";
+import CountryToCountryMoneyFlow from "./CountryToCountry";
+import Club from "./Club";
 
 const drawerWidth = 240;
 
@@ -130,7 +131,8 @@ class App extends Component {
     const { classes } = this.props;
 
     const TransfersRoute = () => <TopTransfers />;
-    const ClubSpendingRoute = () => <MoneyInMoneyOut />;
+    const ClubSpendingRoute = () => <Clubs />;
+    const ClubRoute = props => <Club uriProps={props} />;
     const CountryMoneyFlowRoute = () => <MoneyFlow />;
     const CountryToCountryMoneyFlowRoute = props => (
       <CountryToCountryMoneyFlow uriProps={props} />
@@ -230,6 +232,7 @@ class App extends Component {
                 <TransfersRoute path="/" />
                 <TransfersRoute path="transfers" />
                 <ClubSpendingRoute path="club-spending" />
+                <ClubRoute path="club-spending/:club" />
                 <CountryMoneyFlowRoute path="money-flow" />
                 <CountryToCountryMoneyFlowRoute path="money-flow/:country1/:country2" />
               </Router>

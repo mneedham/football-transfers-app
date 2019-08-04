@@ -19,6 +19,8 @@ import {
 import Avatar from "@material-ui/core/Avatar";
 import TablePagination from "@material-ui/core/TablePagination";
 import { withApollo } from "react-apollo";
+
+import { CompareArrows } from "@material-ui/icons";
 import Link from "@material-ui/core/Link";
 
 const styles = theme => ({
@@ -83,7 +85,7 @@ const QUERY = gql`
   }
 `;
 
-class TopTransfers extends React.Component {
+class CountryToCountry extends React.Component {
   constructor(props) {
     super(props);
 
@@ -110,21 +112,35 @@ class TopTransfers extends React.Component {
     this.setState({ order, orderBy, page: 0 });
   };
 
-  getFromClubFilter = () => {
-    return { from_club: { name_contains: this.state.fromClubFilter } };
+  getFromCountryFilter = country => {
+    return {
+      from_club: { in_league: { in_country: { name_contains: country } } }
+    };
   };
 
-  getToClubFilter = () => {
-    return { to_club: { name_contains: this.state.toClubFilter } };
+  getToCountryFilter = country => {
+    return {
+      to_club: { in_league: { in_country: { name_contains: country } } }
+    };
   };
 
-  handleFilterChange = filterName => event => {
-    const val = event.target.value;
-
-    this.setState({
-      [filterName]: val,
-      page: 0
-    });
+  getFilter = () => {
+    return {
+      OR: [
+        {
+          AND: [
+            this.getFromCountryFilter(this.props.uriProps.country1),
+            this.getToCountryFilter(this.props.uriProps.country2)
+          ]
+        },
+        {
+          AND: [
+            this.getFromCountryFilter(this.props.uriProps.country2),
+            this.getToCountryFilter(this.props.uriProps.country1)
+          ]
+        }
+      ]
+    };
   };
 
   handleChangeRowsPerPage = event => {
@@ -149,12 +165,11 @@ class TopTransfers extends React.Component {
   }
 
   updateTotalRowCount() {
-    const filter = { AND: [this.getFromClubFilter(), this.getToClubFilter()] };
     this.props.client
       .query({
         query: TOTAL_COUNT_QUERY,
         variables: {
-          filter: filter,
+          filter: this.getFilter(),
           orderBy: this.state.orderBy + "_" + this.state.order
         }
       })
@@ -177,42 +192,16 @@ class TopTransfers extends React.Component {
     return (
       <Paper className={classes.root}>
         <Typography variant="h2" style={{ padding: "7px" }} gutterBottom>
-          Transfers
+          {this.props.uriProps.country1} <CompareArrows fontSize={"large"} />{" "}
+          {this.props.uriProps.country2} Transfers
         </Typography>
-        <TextField
-          id="fromClub"
-          label="From Club"
-          className={classes.textField}
-          value={this.state.fromClubFilter}
-          onChange={this.handleFilterChange("fromClubFilter")}
-          margin="normal"
-          variant="outlined"
-          type="text"
-          InputProps={{
-            className: classes.input
-          }}
-        />
-
-        <TextField
-          id="toClub"
-          label="To Club"
-          className={classes.textField}
-          value={this.state.toClubFilter}
-          onChange={this.handleFilterChange("toClubFilter")}
-          margin="normal"
-          variant="outlined"
-          type="text"
-          InputProps={{
-            className: classes.input
-          }}
-        />
 
         <Query
           query={QUERY}
           variables={{
             first: this.state.rowsPerPage,
             offset: this.state.rowsPerPage * this.state.page,
-            filter: { AND: [this.getFromClubFilter(), this.getToClubFilter()] },
+            filter: this.getFilter(),
             orderBy: this.state.orderBy + "_" + this.state.order
           }}
         >
@@ -295,6 +284,7 @@ class TopTransfers extends React.Component {
                                   )}
                                 />
                               ) : null}
+
                               {n.of_player[0].name}
                             </div>
                           </TableCell>
@@ -389,4 +379,4 @@ class TopTransfers extends React.Component {
   }
 }
 
-export default withStyles(styles)(withApollo(TopTransfers));
+export default withStyles(styles)(withApollo(CountryToCountry));
