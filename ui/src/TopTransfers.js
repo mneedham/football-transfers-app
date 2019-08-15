@@ -20,6 +20,7 @@ import Avatar from "@material-ui/core/Avatar";
 import TablePagination from "@material-ui/core/TablePagination";
 import { withApollo } from "react-apollo";
 import Link from "@material-ui/core/Link";
+import { navigate } from "@reach/router";
 
 const styles = theme => ({
   root: {
@@ -320,6 +321,12 @@ class TopTransfers extends React.Component {
 
                               <Link
                                 href={"/club-spending/" + n.from_club[0].name}
+                                onClick={e => {
+                                  e.preventDefault();
+                                  navigate(
+                                    "/club-spending/" + n.from_club[0].name
+                                  );
+                                }}
                               >
                                 {n.from_club[0].name}
                               </Link>
@@ -347,6 +354,12 @@ class TopTransfers extends React.Component {
 
                               <Link
                                 href={"/club-spending/" + n.to_club[0].name}
+                                onClick={e => {
+                                  e.preventDefault();
+                                  navigate(
+                                    "/club-spending/" + n.to_club[0].name
+                                  );
+                                }}
                               >
                                 {n.to_club[0].name}
                               </Link>

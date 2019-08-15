@@ -19,7 +19,7 @@ const app = express();
  */
 
 const schema = makeAugmentedSchema({
-  typeDefs, config: {query: true, mutation: false}
+  typeDefs, config: {query: true, mutation: false, debug: true}
 });
 
 // const inferAugmentedSchema = driver => {

@@ -20,6 +20,7 @@ import Avatar from "@material-ui/core/Avatar";
 import TablePagination from "@material-ui/core/TablePagination";
 import { withApollo } from "react-apollo";
 import Link from "@material-ui/core/Link";
+import { navigate } from "@reach/router";
 
 const styles = theme => ({
   root: {
@@ -278,7 +279,13 @@ class Clubs extends React.Component {
                                 />
                               ) : null}
 
-                              <Link href={"/club-spending/" + n.club}>
+                              <Link
+                                href={"/club-spending/" + n.club}
+                                onClick={e => {
+                                  e.preventDefault();
+                                  navigate("/club-spending/" + n.club);
+                                }}
+                              >
                                 {n.club}
                               </Link>
                             </div>
