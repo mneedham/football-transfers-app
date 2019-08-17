@@ -22,6 +22,7 @@ import { withApollo } from "react-apollo";
 
 import { CompareArrows } from "@material-ui/icons";
 import Link from "@material-ui/core/Link";
+import { navigate } from "@reach/router";
 
 const styles = theme => ({
   root: {
@@ -288,6 +289,12 @@ class Club extends React.Component {
 
                               <Link
                                 href={"/club-spending/" + n.from_club[0].name}
+                                onClick={e => {
+                                  e.preventDefault();
+                                  navigate(
+                                    "/club-spending/" + n.from_club[0].name
+                                  );
+                                }}
                               >
                                 {n.from_club[0].name}
                               </Link>
@@ -315,6 +322,12 @@ class Club extends React.Component {
 
                               <Link
                                 href={"/club-spending/" + n.to_club[0].name}
+                                onClick={e => {
+                                  e.preventDefault();
+                                  navigate(
+                                    "/club-spending/" + n.to_club[0].name
+                                  );
+                                }}
                               >
                                 {n.to_club[0].name}
                               </Link>

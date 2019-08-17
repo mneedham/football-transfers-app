@@ -3,6 +3,7 @@ version: '3'
 services:
 
   neo4j:
+    container_name: ft_neo4j
     build: ./neo4j
     ports:
       - 7474:7474
@@ -14,6 +15,7 @@ services:
       - NEO4J_dbms_shell_enabled=true
 
   api:
+    container_name: ft_api
     build: ./api
     ports:
       - 4000:4000
@@ -23,6 +25,7 @@ services:
     - neo4j
 
   ui:
+    container_name: ft_ui
     build: ./ui
     ports:
       - 3000:3000

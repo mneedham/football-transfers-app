@@ -42,7 +42,10 @@ const styles = theme => ({
 });
 
 const TOTAL_COUNT_QUERY = gql`
-  query topSpendingQuery($country: String, $orderBy: [_SpendingOrdering]) {
+  query topSpendingQuery(
+    $country: String
+    $orderBy: [_SpendingByClubOrdering]
+  ) {
     spendingByClub(countrySubstring: $country, orderBy: $orderBy) {
       club
     }
@@ -52,7 +55,7 @@ const TOTAL_COUNT_QUERY = gql`
 const QUERY = gql`
   query topSpendingQuery(
     $country: String
-    $orderBy: [_SpendingOrdering]
+    $orderBy: [_SpendingByClubOrdering]
     $first: Int
     $offset: Int
   ) {
