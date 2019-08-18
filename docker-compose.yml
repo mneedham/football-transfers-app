@@ -14,22 +14,22 @@ services:
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_dbms_shell_enabled=true
 
-  api:
-    container_name: ft_api
-    build: ./api
-    ports:
-      - 4000:4000
-    links:
-    - neo4j
-    depends_on:
-    - neo4j
-
-  ui:
-    container_name: ft_ui
-    build: ./ui
-    ports:
-      - 3000:3000
-    links:
-    - api
-    depends_on:
-    - api
+#  api:
+#    container_name: ft_api
+#    build: ./api
+#    ports:
+#      - 4000:4000
+#    links:
+#    - neo4j
+#    depends_on:
+#    - neo4j
+#
+#  ui:
+#    container_name: ft_ui
+#    build: ./ui
+#    ports:
+#      - 3000:3000
+#    links:
+#    - api
+#    depends_on:
+#    - api

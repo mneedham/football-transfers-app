@@ -32,6 +32,7 @@ import { Router, Link } from "@reach/router";
 import { navigate } from "@reach/router";
 import CountryToCountryMoneyFlow from "./CountryToCountry";
 import Club from "./Club";
+import Leagues from "./Leagues";
 
 const drawerWidth = 240;
 
@@ -132,6 +133,7 @@ class App extends Component {
 
     const TransfersRoute = () => <TopTransfers />;
     const ClubSpendingRoute = () => <Clubs />;
+    const LeagueSpendingRoute = () => <Leagues />;
     const ClubRoute = props => <Club uriProps={props} />;
     const CountryMoneyFlowRoute = () => <MoneyFlow />;
     const CountryToCountryMoneyFlowRoute = props => (
@@ -214,6 +216,13 @@ class App extends Component {
                   <ListItemText primary="Club Spending" />
                 </ListItem>
 
+                <ListItem button onClick={() => navigate("/league-spending")}>
+                  <ListItemIcon>
+                    <AttachMoney />
+                  </ListItemIcon>
+                  <ListItemText primary="League Spending" />
+                </ListItem>
+
                 <ListItem button onClick={() => navigate("/money-flow")}>
                   <ListItemIcon>
                     <ThreeSixtyIcon />
@@ -232,6 +241,7 @@ class App extends Component {
                 <TransfersRoute path="/" />
                 <TransfersRoute path="transfers" />
                 <ClubSpendingRoute path="club-spending" />
+                <LeagueSpendingRoute path="league-spending" />
                 <ClubRoute path="club-spending/:club" />
                 <CountryMoneyFlowRoute path="money-flow" />
                 <CountryToCountryMoneyFlowRoute path="money-flow/:country1/:country2" />
